@@ -1,69 +1,113 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 행동 성향 설문</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <section class="hero">
       <div class="panel hero-main">
-        <div class="badge">AI 행동 성향 설문 플랫폼</div>
-        <h1>AI 행동 성향 설문</h1>
+        <div class="badge">
+          AI 행동 성향 설문 플랫폼
+        </div>
+        <h1>
+          AI 행동 성향 설문
+        </h1>
         <p>
-          버튼을 누르면 설문지를 받고, 답변을 제출할 수 있는 웹페이지입니다.
+          버튼을 누르면 설문을 시작할 수 있습니다.
         </p>
         <div class="actions">
-          <button class="primary-btn" id="startBtn">설문 시작하기</button>
+          <button id="startBtn" class="primary-btn">
+            설문 시작하기
+          </button>
         </div>
       </div>
     </section>
-
     <section class="panel section" id="surveySection">
       <h2>설문 응답</h2>
-      <p class="sub">문항에 답하고 제출 버튼을 누르세요.</p>
-
-      <div class="form-wrap" id="surveyFormWrap">
+      <p class="sub">
+        아래 질문에 답한 후 제출하세요.
+      </p>
+      <div class="form-wrap">
         <form id="surveyForm">
           <div class="question">
-            <label>Q1. 새로운 문제를 만나면 먼저 구조를 나누어 생각하는 편인가요?</label>
+            <label>
+              Q1. 새로운 문제를 만나면 먼저 구조를 나누어 생각하는 편인가요?
+            </label>
             <div class="options">
-              <label class="option"><input type="radio" name="q1" value="1" required>전혀 아니다</label>
-              <label class="option"><input type="radio" name="q1" value="2">아니다</label>
-              <label class="option"><input type="radio" name="q1" value="3">보통이다</label>
-              <label class="option"><input type="radio" name="q1" value="4">그렇다</label>
-              <label class="option"><input type="radio" name="q1" value="5">매우 그렇다</label>
+              <label class="option">
+                <input type="radio" name="q1" value="1" required>
+                전혀 아니다
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="2">
+                아니다
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="3">
+                보통이다
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="4">
+                그렇다
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="5">
+                매우 그렇다
+              </label>
             </div>
           </div>
-
           <div class="question">
-            <label>Q2. 응답할 때 정확성을 속도보다 더 우선하나요?</label>
+            <label>
+              Q2. 응답할 때 정확성을 속도보다 우선하나요?
+            </label>
             <div class="options">
-              <label class="option"><input type="radio" name="q2" value="1" required>전혀 아니다</label>
-              <label class="option"><input type="radio" name="q2" value="2">아니다</label>
-              <label class="option"><input type="radio" name="q2" value="3">보통이다</label>
-              <label class="option"><input type="radio" name="q2" value="4">그렇다</label>
-              <label class="option"><input type="radio" name="q2" value="5">매우 그렇다</label>
+              <label class="option">
+                <input type="radio" name="q2" value="1" required>
+                전혀 아니다
+              </label>
+              <label class="option">
+                <input type="radio" name="q2" value="2">
+                아니다
+              </label>
+              <label class="option">
+                <input type="radio" name="q2" value="3">
+                보통이다
+              </label>
+              <label class="option">
+                <input type="radio" name="q2" value="4">
+                그렇다
+              </label>
+              <label class="option">
+                <input type="radio" name="q2" value="5">
+                매우 그렇다
+              </label>
             </div>
           </div>
-
           <div class="question">
-            <label for="opinion">추가 의견</label>
-            <textarea id="opinion" name="opinion" rows="5" placeholder="자유롭게 적어주세요."></textarea>
+            <label for="opinion">
+              추가 의견
+            </label>
+            <textarea
+              id="opinion"
+              name="opinion"
+              rows="5"
+              placeholder="자유롭게 의견을 적어주세요."
+            ></textarea>
           </div>
-
           <div class="form-actions">
-            <button type="submit" class="primary-btn">설문 제출하기</button>
+            <button type="submit" id="submitBtn" class="primary-btn">
+              설문 제출하기
+            </button>
           </div>
-
-          <div class="status" id="statusMessage"></div>
+          <div class="status" id="statusMessage" role="status" aria-live="polite"></div>
         </form>
       </div>
     </section>
   </div>
-
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

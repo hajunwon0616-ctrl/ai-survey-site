@@ -96,6 +96,55 @@ p {
   margin-top: 20px;
 }
 
+.shortcut-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(40, 75, 99, 0.12);
+}
+
+.shortcut-copy strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.shortcut-copy p {
+  margin: 0;
+}
+
+.shortcut-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shortcut-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(40, 75, 99, 0.08);
+  border: 1px solid rgba(40, 75, 99, 0.14);
+  color: var(--secondary);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.shortcut-link:hover {
+  transform: translateY(-1px);
+  background: rgba(40, 75, 99, 0.12);
+  border-color: rgba(40, 75, 99, 0.22);
+}
+
 button {
   border: 1px solid transparent;
   border-radius: 14px;
@@ -420,6 +469,10 @@ code {
 
   .section-header {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shortcut-panel {
     align-items: flex-start;
   }
 

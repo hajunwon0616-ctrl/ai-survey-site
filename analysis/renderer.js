@@ -97,6 +97,8 @@ const UI_TEXT = {
     analyzing: "분석 중...",
     submit: "분석 후 저장하기",
     reportType: "Report Type",
+    provider: "Provider",
+    testLabel: "Test Label",
     generatedTime: "Generated Time",
     responseLength: "Response Length",
     model: "Model",
@@ -125,6 +127,9 @@ const UI_TEXT = {
     strength: "강점",
     weakness: "약점",
     neutral: "보통",
+    expandAll: "전체 펼치기",
+    collapseAll: "접기",
+    fullAnswer: "전체 답변",
     copyDone: "리포트 요약을 복사했습니다.",
     downloadDone: "리포트 파일을 다운로드했습니다.",
     parsedSuffix: "문항 분석 완료"
@@ -134,6 +139,8 @@ const UI_TEXT = {
     analyzing: "Analyzing...",
     submit: "Analyze and Save",
     reportType: "Report Type",
+    provider: "Provider",
+    testLabel: "Test Label",
     generatedTime: "Generated Time",
     responseLength: "Response Length",
     model: "Model",
@@ -162,6 +169,9 @@ const UI_TEXT = {
     strength: "Strength",
     weakness: "Weakness",
     neutral: "Neutral",
+    expandAll: "Expand all",
+    collapseAll: "Collapse",
+    fullAnswer: "Full answer",
     copyDone: "Copied the report summary.",
     downloadDone: "Downloaded the report file.",
     parsedSuffix: "questions analyzed"
@@ -177,11 +187,17 @@ function bindResultActions(elements, handlers) {
   elements.insightSort?.addEventListener("change", (event) => {
     handlers.onSortChange?.(event.target.value);
   });
+  elements.insightExpandBtn?.addEventListener("click", () => {
+    handlers.onToggleInsightExpansion?.();
+  });
   elements.copyReportBtn?.addEventListener("click", async () => {
     await handlers.onCopyReport?.();
   });
   elements.downloadReportBtn?.addEventListener("click", () => {
     handlers.onDownloadReport?.();
+  });
+  elements.exportPdfBtn?.addEventListener("click", () => {
+    handlers.onExportPdf?.();
   });
   elements.closeReportBtn?.addEventListener("click", () => {
     handlers.onCloseReport?.();
@@ -214,7 +230,8 @@ function renderResults(elements, payload, overrides = {}) {
   const uiState = {
     sortMode: overrides.sortMode ?? payload.uiState?.sortMode ?? "question-order",
     showAllInsights: true,
-    locale: overrides.locale ?? payload.uiState?.locale ?? "ko"
+    locale: overrides.locale ?? payload.uiState?.locale ?? "ko",
+    insightsExpanded: overrides.insightsExpanded ?? payload.uiState?.insightsExpanded ?? false
   };
   payload.uiState = uiState;
   const text = UI_TEXT[uiState.locale];
@@ -224,10 +241,11 @@ function renderResults(elements, payload, overrides = {}) {
   elements.completenessLabel.textContent = `${payload.parserSummary.parsedCount}/${payload.analysisMeta.totalQuestions} ${text.parsedSuffix}`;
   elements.summaryText.textContent = payload.summary;
   elements.diagnosticNotes.textContent = payload.report.diagnosticSummary;
-  renderAxisSummary(elements.strongAxes, payload.report.strongestAxes);
-  renderAxisSummary(elements.weakAxes, payload.report.weakestAxes);
+  renderAxisSummary(elements.strongAxes, payload.report.strongestAxes, uiState.locale);
+  renderAxisSummary(elements.weakAxes, payload.report.weakestAxes, uiState.locale);
 
   renderReportMeta(elements.reportMeta, payload);
+  renderRadarChart(document.getElementById("radarChart"), payload.axisScores, uiState.locale);
   renderAxisCards(elements.axisScores, payload.axisScores, uiState.locale);
   renderAxisTable(elements.axisTableBody, payload.axisScores, uiState.locale);
   renderList(elements.recommendedUsage, payload.report.recommendedUsage);
@@ -253,6 +271,9 @@ function renderResults(elements, payload, overrides = {}) {
     `${text.curatorReady}: ${payload.analysisMeta.readyForQuestionCurator ? text.yes : text.no}`
   ]);
   renderQuestionInsights(elements, payload.questionResponses, uiState);
+  if (elements.insightExpandBtn) {
+    elements.insightExpandBtn.textContent = uiState.insightsExpanded ? text.collapseAll : text.expandAll;
+  }
 
   elements.resultsSection.scrollTo?.({ top: 0, behavior: "smooth" });
 }
@@ -263,9 +284,11 @@ function renderReportMeta(container, payload) {
     [text.reportType, payload.report.reportHeader.reportType],
     [text.surveyVersion, payload.surveyVersion],
     ["Analysis ID", payload.report.reportHeader.analysisId],
+    [text.provider, payload.providerName || text.none],
     [text.generatedTime, payload.report.reportHeader.generatedAt],
     [text.responseLength, `${payload.report.responseLength} chars`],
-    [text.model, payload.modelName || text.none]
+    [text.model, payload.modelName || text.none],
+    [text.testLabel, payload.testLabel || text.none]
   ];
 
   container.innerHTML = "";
@@ -342,6 +365,12 @@ function renderQuestionInsights(elements, questionResponses, uiState) {
     const answerPreview = response.answerText
       ? `${response.answerText.slice(0, 220)}${response.answerText.length > 220 ? "..." : ""}`
       : text.noAnswer;
+    const fullAnswerBlock = response.answerText
+      ? `<details class="question-answer-details"${uiState.insightsExpanded ? " open" : ""}>
+          <summary>${text.fullAnswer}</summary>
+          <pre>${escapeHtml(response.answerText)}</pre>
+        </details>`
+      : "";
     const item = document.createElement("article");
     item.className = "question-analysis-item";
     item.innerHTML = `
@@ -359,6 +388,7 @@ function renderQuestionInsights(elements, questionResponses, uiState) {
       <div class="analysis-tags">
         ${response.analysisTags.map((tag) => `<span class="pill">${tag}</span>`).join("")}
       </div>
+      ${fullAnswerBlock}
     `;
     elements.questionAnalysisList.appendChild(item);
   });
@@ -377,17 +407,22 @@ function renderList(listElement, items) {
   });
 }
 
-function renderAxisSummary(container, axisEntries) {
+function renderAxisSummary(container, axisEntries, locale = "ko") {
   if (!container) {
     return;
   }
 
   container.innerHTML = "";
   axisEntries.forEach(([axis, score]) => {
-    const chip = document.createElement("span");
-    chip.className = "pill";
-    chip.textContent = `${axis}: ${score}`;
-    container.appendChild(chip);
+    const description = AXIS_DESCRIPTIONS[axis][locale] || AXIS_DESCRIPTIONS[axis].ko;
+    const item = document.createElement("article");
+    item.className = "axis-summary-item";
+    item.innerHTML = `
+      <strong>${axis}</strong>
+      <p>${description.short}</p>
+      <span class="pill">${score}</span>
+    `;
+    container.appendChild(item);
   });
 }
 
@@ -427,6 +462,92 @@ function adjustTooltipAlignment(container) {
       tooltip.classList.add("tooltip-align-right");
     }
   });
+}
+
+function renderRadarChart(canvas, axisScores, locale = "ko") {
+  if (!canvas || typeof canvas.getContext !== "function") {
+    return;
+  }
+
+  const context = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.min(width, height) * 0.32;
+  const axes = Object.keys(axisScores);
+  const values = Object.values(axisScores);
+  context.clearRect(0, 0, width, height);
+
+  for (let level = 1; level <= 5; level += 1) {
+    const ringRadius = radius * (level / 5);
+    drawPolygon(context, axes.length, centerX, centerY, ringRadius, {
+      strokeStyle: "rgba(40, 75, 99, 0.12)",
+      lineWidth: 1
+    });
+  }
+
+  axes.forEach((axis, index) => {
+    const angle = ((Math.PI * 2) / axes.length) * index - Math.PI / 2;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(x, y);
+    context.strokeStyle = "rgba(40, 75, 99, 0.14)";
+    context.lineWidth = 1;
+    context.stroke();
+
+    const label = AXIS_DESCRIPTIONS[axis][locale] || AXIS_DESCRIPTIONS[axis].ko;
+    context.fillStyle = "#284b63";
+    context.font = "600 12px Segoe UI";
+    context.textAlign = x >= centerX ? "left" : "right";
+    context.fillText(label.short, x + (x >= centerX ? 10 : -10), y);
+  });
+
+  context.beginPath();
+  values.forEach((value, index) => {
+    const angle = ((Math.PI * 2) / axes.length) * index - Math.PI / 2;
+    const pointRadius = radius * (value / 100);
+    const x = centerX + Math.cos(angle) * pointRadius;
+    const y = centerY + Math.sin(angle) * pointRadius;
+    if (index === 0) {
+      context.moveTo(x, y);
+    } else {
+      context.lineTo(x, y);
+    }
+  });
+  context.closePath();
+  context.fillStyle = "rgba(201, 111, 59, 0.18)";
+  context.strokeStyle = "#c96f3b";
+  context.lineWidth = 2;
+  context.fill();
+  context.stroke();
+}
+
+function drawPolygon(context, sides, centerX, centerY, radius, styles) {
+  context.beginPath();
+  for (let index = 0; index < sides; index += 1) {
+    const angle = ((Math.PI * 2) / sides) * index - Math.PI / 2;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    if (index === 0) {
+      context.moveTo(x, y);
+    } else {
+      context.lineTo(x, y);
+    }
+  }
+  context.closePath();
+  context.strokeStyle = styles.strokeStyle;
+  context.lineWidth = styles.lineWidth;
+  context.stroke();
+}
+
+function escapeHtml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
 export {

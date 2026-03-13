@@ -261,6 +261,22 @@ button:disabled {
   margin-bottom: 8px;
 }
 
+.workflow-panel .process-card {
+  position: relative;
+  padding-top: 24px;
+}
+
+.process-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  background: rgba(40, 75, 99, 0.08);
+  font-size: 22px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -273,6 +289,31 @@ button:disabled {
   display: block;
   font-weight: 700;
   margin-bottom: 10px;
+}
+
+.field-helper {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.provider-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.provider-chip {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--secondary);
+  border: 1px solid rgba(40, 75, 99, 0.14);
+  border-radius: 999px;
+  padding: 10px 14px;
+}
+
+.provider-chip.is-active {
+  background: var(--secondary);
+  color: #f8fafc;
+  border-color: var(--secondary);
 }
 
 .question {
@@ -441,6 +482,27 @@ textarea {
   border-radius: 18px;
   background: rgba(40, 75, 99, 0.06);
   border: 1px solid rgba(40, 75, 99, 0.08);
+}
+
+.radar-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 18px;
+}
+
+.radar-card {
+  display: grid;
+  place-items: center;
+  min-height: 420px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(40, 75, 99, 0.1);
+  padding: 18px;
+}
+
+#radarChart {
+  width: min(100%, 520px);
+  height: auto;
 }
 
 .report-meta-grid {
@@ -669,6 +731,29 @@ textarea {
   background: rgba(255, 255, 255, 0.76);
 }
 
+.question-answer-details {
+  margin-top: 12px;
+  border-top: 1px dashed rgba(40, 75, 99, 0.18);
+  padding-top: 12px;
+}
+
+.question-answer-details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--secondary);
+}
+
+.question-answer-details pre {
+  margin: 10px 0 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(40, 75, 99, 0.06);
+  color: var(--text);
+  font: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .question-analysis-item h4 {
   margin: 0 0 10px;
 }
@@ -726,9 +811,26 @@ textarea {
 }
 
 .summary-chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  gap: 10px;
+}
+
+.axis-summary-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(40, 75, 99, 0.1);
+}
+
+.axis-summary-item strong {
+  font-size: 14px;
+}
+
+.axis-summary-item p {
+  margin: 0;
+  font-size: 13px;
 }
 
 .prescription-sheet {
@@ -911,5 +1013,42 @@ code {
     margin: 6px;
     padding: 18px;
     border-radius: 24px;
+  }
+
+  .radar-card {
+    min-height: 300px;
+  }
+}
+
+@media print {
+  body:not(.print-report-mode) * {
+    visibility: hidden;
+  }
+
+  body.print-report-mode .report-modal,
+  body.print-report-mode .report-modal * {
+    visibility: visible;
+  }
+
+  body.print-report-mode .report-modal {
+    position: static;
+    inset: auto;
+  }
+
+  body.print-report-mode .report-backdrop,
+  body.print-report-mode #closeReportBtn,
+  body.print-report-mode #copyReportBtn,
+  body.print-report-mode #downloadReportBtn,
+  body.print-report-mode #exportPdfBtn {
+    display: none !important;
+  }
+
+  body.print-report-mode .report-window {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    box-shadow: none;
+    border: 0;
+    background: #ffffff;
   }
 }

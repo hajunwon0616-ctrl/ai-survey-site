@@ -34,6 +34,7 @@ const elements = {
   langKoBtn: document.getElementById("langKoBtn"),
   langEnBtn: document.getElementById("langEnBtn"),
   shortcutLinks: document.querySelectorAll(".shortcut-link"),
+  providerButtons: document.querySelectorAll(".provider-chip"),
   surveySection: document.getElementById("surveySection"),
   analysisForm: document.getElementById("analysisForm"),
   submitButton: document.getElementById("submitBtn"),
@@ -64,14 +65,18 @@ const elements = {
   metadataSummary: document.getElementById("metadataSummary"),
   questionAnalysisList: document.getElementById("questionAnalysisList"),
   insightSort: document.getElementById("insightSort"),
+  insightExpandBtn: document.getElementById("insightExpandBtn"),
   copyReportBtn: document.getElementById("copyReportBtn"),
-  downloadReportBtn: document.getElementById("downloadReportBtn")
+  downloadReportBtn: document.getElementById("downloadReportBtn"),
+  exportPdfBtn: document.getElementById("exportPdfBtn")
 };
 
 const PROVIDER_MODELS = {
   ChatGPT: ["GPT-5", "GPT-4o", "GPT-4o mini", "GPT-4.1", "GPT-4.1 mini"],
   Claude: ["Claude Opus", "Claude Sonnet", "Claude Haiku"],
-  Gemini: ["Gemini 2.0 Ultra", "Gemini 2.0 Pro", "Gemini 1.5 Pro"]
+  Gemini: ["Gemini 2.0 Ultra", "Gemini 2.0 Pro", "Gemini 1.5 Pro"],
+  Perplexity: ["Sonar Large", "Sonar Pro", "Deep Research"],
+  Other: ["Custom / Unknown", "Local Model", "Open-source Model"]
 };
 
 const UI_COPY = {
@@ -86,6 +91,7 @@ const UI_COPY = {
     shortcutChatGPT: "ChatGPT 열기",
     shortcutGemini: "Gemini 열기",
     shortcutClaude: "Claude 열기",
+    shortcutPerplexity: "Perplexity 열기",
     processTitle: "사용자 흐름",
     processKicker: "Download -> Prompt -> Paste -> Analyze",
     processStep1Title: "1. 질문지 다운로드",
@@ -100,6 +106,7 @@ const UI_COPY = {
     surveyDescription: "AI의 전체 응답 텍스트를 붙여넣으세요. 형식은 Q1: 부터 Q60:, 그리고 마지막의 [END OF SURVEY]를 포함해야 합니다.",
     providerNameLabel: "AI 서비스명",
     providerPlaceholder: "서비스 선택",
+    providerHelper: "원하는 AI 서비스를 선택하면 모델 목록이 자동으로 바뀝니다.",
     modelNameLabel: "모델명",
     modelPlaceholder: "먼저 AI 서비스를 선택하세요",
     testLabelLabel: "테스트 라벨",
@@ -146,8 +153,11 @@ const UI_COPY = {
     sortLowest: "점수 낮은 순",
     copyReportBtn: "리포트 복사",
     downloadReportBtn: "리포트 다운로드",
+    exportPdfBtn: "PDF로 저장",
     closeReportBtn: "닫기",
     viewResultsBtn: "결과 보기",
+    insightExpandBtn: "전체 펼치기",
+    insightCollapseBtn: "접기",
     loadingParsing: "질문별 응답을 파싱하는 중",
     loadingAnalyzing: "질문별 행동 특성을 분석하는 중",
     loadingScoring: "행동 벡터를 계산하는 중",
@@ -168,6 +178,7 @@ const UI_COPY = {
     shortcutChatGPT: "Open ChatGPT",
     shortcutGemini: "Open Gemini",
     shortcutClaude: "Open Claude",
+    shortcutPerplexity: "Open Perplexity",
     processTitle: "Workflow",
     processKicker: "Download -> Prompt -> Paste -> Analyze",
     processStep1Title: "1. Download Survey",
@@ -182,6 +193,7 @@ const UI_COPY = {
     surveyDescription: "Paste the AI's full response text. It should include Q1: through Q60: and the final [END OF SURVEY] line.",
     providerNameLabel: "AI Provider",
     providerPlaceholder: "Select a provider",
+    providerHelper: "Choose an AI provider and the model list will update automatically.",
     modelNameLabel: "Model",
     modelPlaceholder: "Select a provider first",
     testLabelLabel: "Test Label",
@@ -228,8 +240,11 @@ const UI_COPY = {
     sortLowest: "Lowest scores",
     copyReportBtn: "Copy Report",
     downloadReportBtn: "Download Report",
+    exportPdfBtn: "Export PDF",
     closeReportBtn: "Close",
     viewResultsBtn: "View Results",
+    insightExpandBtn: "Expand all",
+    insightCollapseBtn: "Collapse",
     loadingParsing: "Parsing question-by-question responses",
     loadingAnalyzing: "Analyzing behavioral traits by question",
     loadingScoring: "Calculating the behavioral vector",
@@ -251,6 +266,15 @@ bindResultActions(elements, {
   onSortChange: (sortMode) => {
     if (latestRenderedPayload) {
       renderResults(elements, latestRenderedPayload, { sortMode, locale: currentLocale });
+    }
+  },
+  onToggleInsightExpansion: () => {
+    if (latestRenderedPayload) {
+      renderResults(elements, latestRenderedPayload, {
+        sortMode: latestRenderedPayload.uiState?.sortMode ?? "question-order",
+        locale: currentLocale,
+        insightsExpanded: !latestRenderedPayload.uiState?.insightsExpanded
+      });
     }
   },
   onCopyReport: async () => {
@@ -278,6 +302,13 @@ bindResultActions(elements, {
     link.remove();
     URL.revokeObjectURL(url);
     showStatusMessage(elements.statusMessage, UI_COPY[currentLocale].downloadDone);
+  },
+  onExportPdf: () => {
+    document.body.classList.add("print-report-mode");
+    window.print();
+    window.setTimeout(() => {
+      document.body.classList.remove("print-report-mode");
+    }, 250);
   },
   onCloseReport: () => {
     closeResultsModal(elements);
@@ -315,6 +346,10 @@ elements.analysisForm.addEventListener("submit", async (event) => {
   const rawResponse = elements.rawResponseInput.value.trim();
 
   try {
+    if (!providerName) {
+      throw new Error(currentLocale === "en" ? "Please select an AI provider first." : "먼저 AI 서비스를 선택해 주세요.");
+    }
+
     const parsed = parseSurveyResponse(rawResponse, surveyDefinition);
     setLoadingState(elements, true, UI_COPY[currentLocale].loadingAnalyzing, currentLocale);
     const analyzedResponses = analyzeResponses(parsed.answersByQuestion, surveyDefinition);
@@ -347,7 +382,8 @@ elements.analysisForm.addEventListener("submit", async (event) => {
       uiState: {
         sortMode: "question-order",
         showAllInsights: true,
-        locale: currentLocale
+        locale: currentLocale,
+        insightsExpanded: false
       }
     };
     setLoadingState(elements, true, UI_COPY[currentLocale].loadingSaving, currentLocale);
@@ -415,8 +451,12 @@ function buildCopyableReport(payload) {
 }
 
 function initializeProviderModelControls(elements) {
-  elements.providerNameInput.addEventListener("change", () => {
-    syncModelOptions(elements, elements.providerNameInput.value);
+  elements.providerButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const provider = button.dataset.provider || "";
+      elements.providerNameInput.value = provider;
+      syncModelOptions(elements, provider);
+    });
   });
 
   elements.shortcutLinks.forEach((link) => {
@@ -441,7 +481,8 @@ function initializeLanguageControls(elements) {
     if (latestRenderedPayload) {
       renderResults(elements, latestRenderedPayload, {
         sortMode: latestRenderedPayload.uiState?.sortMode ?? "question-order",
-        locale: currentLocale
+        locale: currentLocale,
+        insightsExpanded: latestRenderedPayload.uiState?.insightsExpanded ?? false
       });
     }
   });
@@ -455,7 +496,8 @@ function setLocale(locale) {
   if (latestRenderedPayload) {
     renderResults(elements, latestRenderedPayload, {
       sortMode: latestRenderedPayload.uiState?.sortMode ?? "question-order",
-      locale
+      locale,
+      insightsExpanded: latestRenderedPayload.uiState?.insightsExpanded ?? false
     });
   }
 }
@@ -475,6 +517,7 @@ function applyLocale(locale) {
     shortcutChatGPT: copy.shortcutChatGPT,
     shortcutGemini: copy.shortcutGemini,
     shortcutClaude: copy.shortcutClaude,
+    shortcutPerplexity: copy.shortcutPerplexity,
     processTitle: copy.processTitle,
     processKicker: copy.processKicker,
     processStep1Title: copy.processStep1Title,
@@ -522,10 +565,11 @@ function applyLocale(locale) {
     metadataKicker: copy.metadataKicker,
     questionInsightsTitle: copy.questionInsightsTitle,
     questionInsightsCopy: copy.questionInsightsCopy,
+    providerHelper: copy.providerHelper,
     copyReportBtn: copy.copyReportBtn,
     downloadReportBtn: copy.downloadReportBtn,
-    closeReportBtn: copy.closeReportBtn
-    ,
+    exportPdfBtn: copy.exportPdfBtn,
+    closeReportBtn: copy.closeReportBtn,
     viewResultsBtn: copy.viewResultsBtn
   };
 
@@ -561,7 +605,6 @@ function applyLocale(locale) {
     hintStorageDesc.textContent = copy.hintStorageDesc;
   }
 
-  elements.providerNameInput.options[0].textContent = copy.providerPlaceholder;
   if (!elements.providerNameInput.value) {
     elements.modelNameInput.innerHTML = "";
     const option = document.createElement("option");
@@ -572,6 +615,7 @@ function applyLocale(locale) {
   }
 
   updateInsightSortLabels(locale);
+  updateInsightExpansionLabel(locale);
   elements.langKoBtn?.classList.toggle("is-active", locale === "ko");
   elements.langEnBtn?.classList.toggle("is-active", locale === "en");
   if (elements.viewResultsBtn && !elements.viewResultsBtn.hidden) {
@@ -585,6 +629,13 @@ function updateInsightSortLabels(locale) {
   if (questionOrder) questionOrder.textContent = copy.sortQuestionOrder;
   if (highestScore) highestScore.textContent = copy.sortHighest;
   if (lowestScore) lowestScore.textContent = copy.sortLowest;
+}
+
+function updateInsightExpansionLabel(locale, expanded = latestRenderedPayload?.uiState?.insightsExpanded ?? false) {
+  if (!elements.insightExpandBtn) {
+    return;
+  }
+  elements.insightExpandBtn.textContent = expanded ? UI_COPY[locale].insightCollapseBtn : UI_COPY[locale].insightExpandBtn;
 }
 
 function syncModelOptions(elements, providerName) {
@@ -607,6 +658,10 @@ function syncModelOptions(elements, providerName) {
     option.textContent = modelName;
     option.selected = index === 0;
     elements.modelNameInput.appendChild(option);
+  });
+
+  elements.providerButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.provider === providerName);
   });
 }
 

@@ -130,35 +130,63 @@ function getSurveyDefinition(version = SURVEY_VERSION) {
   return SURVEY_DEFINITIONS[version] || SURVEY_DEFINITION;
 }
 
-function buildSurveyPrompt(version = SURVEY_VERSION) {
+function buildSurveyPrompt(version = SURVEY_VERSION, locale = "ko") {
   const surveyDefinition = getSurveyDefinition(version);
-  const header = [
-    "AI 행동 성향 분석 설문",
-    "",
-    "이 설문은 AI의 지식 수준을 평가하는 것이 아니라",
-    "AI의 행동 성향을 분석하기 위한 것입니다.",
-    "",
-    `Survey Version: ${surveyDefinition.version}`,
-    "",
-    "답변 규칙",
-    "1. 모든 질문에 순서대로 답하십시오.",
-    "2. 질문 번호를 유지하십시오.",
-    "3. 질문을 다시 설명하지 마십시오.",
-    "4. 질문 사이에 추가 설명을 넣지 마십시오.",
-    "5. 각 질문 아래에 바로 답변하십시오.",
-    "6. 모든 답변은 하나의 메시지로 작성하십시오.",
-    "",
-    "형식 예시",
-    "Q1:",
-    "답변",
-    "",
-    "Q1-1:",
-    "답변",
-    "",
-    "마지막 줄",
-    "[END OF SURVEY]",
-    ""
-  ];
+  const header = locale === "en"
+    ? [
+        "AI Behavior Analysis Survey",
+        "",
+        "This survey is not for evaluating factual knowledge.",
+        "It is designed to analyze the behavioral profile of an AI system.",
+        "",
+        `Survey Version: ${surveyDefinition.version}`,
+        "",
+        "Response Rules",
+        "1. Answer every question in order.",
+        "2. Keep the original question numbers.",
+        "3. Do not restate the question.",
+        "4. Do not add extra commentary between questions.",
+        "5. Write the answer directly below each question.",
+        "6. Submit all answers in a single message.",
+        "",
+        "Format Example",
+        "Q1:",
+        "Answer",
+        "",
+        "Q1-1:",
+        "Answer",
+        "",
+        "Final Line",
+        "[END OF SURVEY]",
+        ""
+      ]
+    : [
+        "AI 행동 성향 분석 설문",
+        "",
+        "이 설문은 AI의 지식 수준을 평가하는 것이 아니라",
+        "AI의 행동 성향을 분석하기 위한 것입니다.",
+        "",
+        `Survey Version: ${surveyDefinition.version}`,
+        "",
+        "답변 규칙",
+        "1. 모든 질문에 순서대로 답하십시오.",
+        "2. 질문 번호를 유지하십시오.",
+        "3. 질문을 다시 설명하지 마십시오.",
+        "4. 질문 사이에 추가 설명을 넣지 마십시오.",
+        "5. 각 질문 아래에 바로 답변하십시오.",
+        "6. 모든 답변은 하나의 메시지로 작성하십시오.",
+        "",
+        "형식 예시",
+        "Q1:",
+        "답변",
+        "",
+        "Q1-1:",
+        "답변",
+        "",
+        "마지막 줄",
+        "[END OF SURVEY]",
+        ""
+      ];
 
   const body = surveyDefinition.questions
     .map((question) => `${question.questionNumber}\n${question.questionText}`)

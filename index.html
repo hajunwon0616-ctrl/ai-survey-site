@@ -10,9 +10,9 @@
   <div class="container">
     <section class="hero">
       <div class="panel hero-main">
-        <div class="badge">Behavioral Profile Analysis</div>
-        <h1>AI 행동 성향 분석 시스템</h1>
-        <p>
+        <div id="heroBadge" class="badge">Behavioral Profile Analysis</div>
+        <h1 id="heroTitle">AI 행동 성향 분석 시스템</h1>
+        <p id="heroDescription">
           질문을 직접 답하는 설문이 아니라, AI가 작성한 전체 응답을 붙여넣어
           행동 벡터를 분석하는 도구입니다.
         </p>
@@ -21,15 +21,20 @@
           <button id="downloadBtn" class="secondary-btn" type="button">질문지 다운로드</button>
         </div>
 
+        <div class="language-switcher" aria-label="Language selector">
+          <button id="langKoBtn" class="lang-btn is-active" type="button">한국어</button>
+          <button id="langEnBtn" class="lang-btn" type="button">English</button>
+        </div>
+
         <div class="shortcut-panel">
           <div class="shortcut-copy">
-            <strong>AI 바로가기</strong>
-            <p>질문지를 받은 뒤 바로 원하는 AI 창으로 이동할 수 있습니다.</p>
+            <strong id="shortcutTitle">AI 바로가기</strong>
+            <p id="shortcutDescription">질문지를 받은 뒤 바로 원하는 AI 창으로 이동할 수 있습니다.</p>
           </div>
           <div class="shortcut-links">
-            <a class="shortcut-link" data-provider="ChatGPT" href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer">ChatGPT 열기</a>
-            <a class="shortcut-link" data-provider="Gemini" href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">Gemini 열기</a>
-            <a class="shortcut-link" data-provider="Claude" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude 열기</a>
+            <a id="shortcutChatGPT" class="shortcut-link" data-provider="ChatGPT" href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer">ChatGPT 열기</a>
+            <a id="shortcutGemini" class="shortcut-link" data-provider="Gemini" href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">Gemini 열기</a>
+            <a id="shortcutClaude" class="shortcut-link" data-provider="Claude" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude 열기</a>
           </div>
         </div>
       </div>
@@ -37,35 +42,35 @@
 
     <section class="panel process-panel">
       <div class="section-header">
-        <h2>사용자 흐름</h2>
-        <span class="section-kicker">Download -> Prompt -> Paste -> Analyze</span>
+        <h2 id="processTitle">사용자 흐름</h2>
+        <span id="processKicker" class="section-kicker">Download -> Prompt -> Paste -> Analyze</span>
       </div>
       <div class="process-grid">
         <div class="process-card">
-          <strong>1. 질문지 다운로드</strong>
-          <p>버전이 포함된 질문 세트를 내려받아 AI에 그대로 입력합니다.</p>
+          <strong id="processStep1Title">1. 질문지 다운로드</strong>
+          <p id="processStep1Desc">버전이 포함된 질문 세트를 내려받아 AI에 그대로 입력합니다.</p>
         </div>
         <div class="process-card">
-          <strong>2. AI 응답 수집</strong>
-          <p>AI가 작성한 전체 답변을 형식 그대로 복사합니다.</p>
+          <strong id="processStep2Title">2. AI 응답 수집</strong>
+          <p id="processStep2Desc">AI가 작성한 전체 답변을 형식 그대로 복사합니다.</p>
         </div>
         <div class="process-card">
-          <strong>3. 응답 붙여넣기</strong>
-          <p>제출 화면에 전체 텍스트를 넣고 분석을 실행합니다.</p>
+          <strong id="processStep3Title">3. 응답 붙여넣기</strong>
+          <p id="processStep3Desc">제출 화면에 전체 텍스트를 넣고 분석을 실행합니다.</p>
         </div>
         <div class="process-card">
-          <strong>4. 행동 벡터 생성</strong>
-          <p>파싱, 축별 분석, 요약 생성 후 Firestore에 저장합니다.</p>
+          <strong id="processStep4Title">4. 행동 벡터 생성</strong>
+          <p id="processStep4Desc">파싱, 축별 분석, 요약 생성 후 Firestore에 저장합니다.</p>
         </div>
       </div>
     </section>
 
     <section class="panel section" id="surveySection">
       <div class="section-header">
-        <h2>AI 응답 제출</h2>
+        <h2 id="surveySectionTitle">AI 응답 제출</h2>
         <span class="section-kicker" id="surveyVersionLabel"></span>
       </div>
-      <p class="sub">
+      <p id="surveyDescription" class="sub">
         AI의 전체 응답 텍스트를 붙여넣으세요. 형식은 <code>Q1:</code> 부터
         <code>Q60:</code>, 그리고 마지막의 <code>[END OF SURVEY]</code>를 포함해야 합니다.
       </p>
@@ -74,7 +79,7 @@
         <form id="analysisForm">
           <div class="form-grid">
             <div class="field">
-              <label for="providerName">AI 서비스명</label>
+              <label id="providerNameLabel" for="providerName">AI 서비스명</label>
               <select id="providerName" name="providerName" required>
                 <option value="">서비스 선택</option>
                 <option value="ChatGPT">ChatGPT</option>
@@ -83,23 +88,23 @@
               </select>
             </div>
             <div class="field">
-              <label for="modelName">모델명</label>
+              <label id="modelNameLabel" for="modelName">모델명</label>
               <select id="modelName" name="modelName" required disabled>
                 <option value="">먼저 AI 서비스를 선택하세요</option>
               </select>
             </div>
             <div class="field">
-              <label for="testLabel">테스트 라벨</label>
+              <label id="testLabelLabel" for="testLabel">테스트 라벨</label>
               <input id="testLabel" name="testLabel" type="text" placeholder="예: GPT 비교 테스트, 3월 실험">
             </div>
             <div class="field">
-              <label for="surveyVersionInput">질문 세트 버전</label>
+              <label id="surveyVersionInputLabel" for="surveyVersionInput">질문 세트 버전</label>
               <input id="surveyVersionInput" name="surveyVersionInput" type="text" readonly>
             </div>
           </div>
 
           <div class="question">
-            <label for="rawResponse">AI 전체 답변</label>
+            <label id="rawResponseLabel" for="rawResponse">AI 전체 답변</label>
             <textarea
               id="rawResponse"
               name="rawResponse"
@@ -111,16 +116,16 @@
 
           <div class="hint-grid">
             <div class="hint-card">
-              <strong>파싱 기준</strong>
-              <p><code>Q번호:</code> 헤더를 기준으로 질문별 답변을 분리합니다.</p>
+              <strong id="hintParseTitle">파싱 기준</strong>
+              <p id="hintParseDesc"><code>Q번호:</code> 헤더를 기준으로 질문별 답변을 분리합니다.</p>
             </div>
             <div class="hint-card">
-              <strong>버전 관리</strong>
-              <p>응답은 현재 질문 세트 버전과 함께 저장됩니다.</p>
+              <strong id="hintVersionTitle">버전 관리</strong>
+              <p id="hintVersionDesc">응답은 현재 질문 세트 버전과 함께 저장됩니다.</p>
             </div>
             <div class="hint-card">
-              <strong>저장 구조</strong>
-              <p>질문, 축, 제약, 분석 태그, 점수가 함께 Firestore에 기록됩니다.</p>
+              <strong id="hintStorageTitle">저장 구조</strong>
+              <p id="hintStorageDesc">질문, 축, 제약, 분석 태그, 점수가 함께 Firestore에 기록됩니다.</p>
             </div>
           </div>
 
@@ -135,10 +140,10 @@
   </div>
 
   <div class="loading-overlay" id="loadingOverlay" hidden>
-    <div class="loading-card">
+      <div class="loading-card">
       <div class="loading-pulse"></div>
-      <p class="loading-eyebrow">AI Behavior Analysis</p>
-      <h2>응답을 분석 중입니다</h2>
+      <p id="loadingEyebrow" class="loading-eyebrow">AI Behavior Analysis</p>
+      <h2 id="loadingTitle">응답을 분석 중입니다</h2>
       <p id="loadingMessage">질문별 응답을 파싱하는 중</p>
     </div>
   </div>
@@ -148,9 +153,9 @@
     <section class="report-window" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
       <div class="report-window-header">
         <div>
-          <p class="prescription-label">AI Behavior Analysis</p>
+          <p id="reportLabel" class="prescription-label">AI Behavior Analysis</p>
           <h2 id="reportTitle">AI 행동 분석 리포트</h2>
-          <p class="report-subtitle">AI 행동 프로파일과 사용 전략을 한 화면에서 확인하는 결과 리포트입니다.</p>
+          <p id="reportSubtitle" class="report-subtitle">AI 행동 프로파일과 사용 전략을 한 화면에서 확인하는 결과 리포트입니다.</p>
         </div>
         <div class="report-window-actions">
           <button id="copyReportBtn" class="secondary-btn" type="button">리포트 복사</button>
@@ -162,7 +167,7 @@
       <div class="report-window-body">
         <section class="report-panel">
           <div class="section-header">
-            <h3>AI Behavior Report</h3>
+            <h3 id="reportOverviewTitle">AI Behavior Report</h3>
             <span class="section-kicker" id="completenessLabel"></span>
           </div>
           <div class="prescription-meta report-meta-grid" id="reportMeta"></div>
@@ -173,17 +178,17 @@
 
         <section class="report-panel">
           <div class="section-header">
-            <h3>Diagnostic Summary</h3>
-            <span class="section-kicker">Strengths vs Weaknesses</span>
+            <h3 id="diagnosticTitle">Diagnostic Summary</h3>
+            <span id="diagnosticKicker" class="section-kicker">Strengths vs Weaknesses</span>
           </div>
           <p id="diagnosticNotes"></p>
           <div class="strength-weakness-grid">
             <div class="results-card strength-card">
-              <h4>Strengths</h4>
+              <h4 id="strengthsTitle">Strengths</h4>
               <div id="strongAxes" class="summary-chip-list"></div>
             </div>
             <div class="results-card weakness-card">
-              <h4>Weaknesses</h4>
+              <h4 id="weaknessesTitle">Weaknesses</h4>
               <div id="weakAxes" class="summary-chip-list"></div>
             </div>
           </div>
@@ -191,25 +196,25 @@
 
         <section class="report-panel">
           <div class="section-header">
-            <h3>Vector Scores</h3>
-            <span class="section-kicker">9 Axes</span>
+            <h3 id="vectorScoresTitle">Vector Scores</h3>
+            <span id="vectorScoresKicker" class="section-kicker">9 Axes</span>
           </div>
           <div class="vector-grid" id="axisScores"></div>
         </section>
 
         <section class="report-panel">
           <div class="section-header">
-            <h3>Axis Score Table</h3>
-            <span class="section-kicker">Interpretation</span>
+            <h3 id="axisTableTitle">Axis Score Table</h3>
+            <span id="axisTableKicker" class="section-kicker">Interpretation</span>
           </div>
           <div class="axis-table-wrap">
             <table class="axis-table">
               <thead>
                 <tr>
-                  <th>Axis</th>
-                  <th>Score</th>
-                  <th>Interpretation</th>
-                  <th>Status</th>
+                  <th id="axisTableHeadAxis">Axis</th>
+                  <th id="axisTableHeadScore">Score</th>
+                  <th id="axisTableHeadInterpretation">Interpretation</th>
+                  <th id="axisTableHeadStatus">Status</th>
                 </tr>
               </thead>
               <tbody id="axisTableBody"></tbody>
@@ -220,16 +225,16 @@
         <div class="results-columns report-columns">
           <section class="report-panel">
             <div class="section-header">
-              <h3>Recommended Usage</h3>
-              <span class="section-kicker">Prompt Strategy</span>
+              <h3 id="recommendedUsageTitle">Recommended Usage</h3>
+              <span id="recommendedUsageKicker" class="section-kicker">Prompt Strategy</span>
             </div>
             <ul id="recommendedUsage" class="bullet-list"></ul>
           </section>
 
           <section class="report-panel">
             <div class="section-header">
-              <h3>Behavioral Warnings</h3>
-              <span class="section-kicker">Watchouts</span>
+              <h3 id="behavioralWarningsTitle">Behavioral Warnings</h3>
+              <span id="behavioralWarningsKicker" class="section-kicker">Watchouts</span>
             </div>
             <ul id="behavioralWarnings" class="bullet-list"></ul>
           </section>
@@ -238,16 +243,16 @@
         <div class="results-columns">
           <section class="report-panel">
             <div class="section-header">
-              <h3>파싱 요약</h3>
-              <span class="section-kicker">Parsing Summary</span>
+              <h3 id="parseSummaryTitle">파싱 요약</h3>
+              <span id="parseSummaryKicker" class="section-kicker">Parsing Summary</span>
             </div>
             <ul id="parseSummary" class="bullet-list"></ul>
           </section>
 
           <section class="report-panel">
             <div class="section-header">
-              <h3>질문 세트 메타데이터</h3>
-              <span class="section-kicker">Metadata</span>
+              <h3 id="metadataTitle">질문 세트 메타데이터</h3>
+              <span id="metadataKicker" class="section-kicker">Metadata</span>
             </div>
             <ul id="metadataSummary" class="bullet-list"></ul>
           </section>
@@ -256,8 +261,8 @@
         <section class="report-panel">
           <div class="insight-toolbar">
             <div>
-              <h3>Question Insights</h3>
-              <p class="toolbar-copy">질문별 전략 태그와 점수를 빠르게 훑어볼 수 있습니다.</p>
+              <h3 id="questionInsightsTitle">Question Insights</h3>
+              <p id="questionInsightsCopy" class="toolbar-copy">질문별 전략 태그와 점수를 빠르게 훑어볼 수 있습니다.</p>
             </div>
             <div class="insight-controls">
               <select id="insightSort">
@@ -265,7 +270,6 @@
                 <option value="highest-score">점수 높은 순</option>
                 <option value="lowest-score">점수 낮은 순</option>
               </select>
-              <button id="insightToggle" class="secondary-btn" type="button">전체 보기</button>
             </div>
           </div>
           <div id="questionAnalysisList" class="question-analysis-list"></div>

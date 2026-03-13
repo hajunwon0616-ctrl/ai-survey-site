@@ -104,6 +104,29 @@ p {
   margin-top: 20px;
 }
 
+.language-switcher {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(40, 75, 99, 0.12);
+}
+
+.lang-btn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--secondary);
+  border-color: transparent;
+}
+
+.lang-btn.is-active {
+  background: var(--secondary);
+  color: #f8fafc;
+}
+
 .shortcut-panel {
   display: flex;
   flex-wrap: wrap;
@@ -430,12 +453,18 @@ textarea {
 .vector-grid {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   margin-bottom: 18px;
+  overflow: visible;
 }
 
 .vector-card {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding-bottom: 16px;
+}
+
+.vector-card:hover,
+.vector-card:focus-within {
+  z-index: 8;
 }
 
 .vector-card::after {
@@ -479,6 +508,7 @@ textarea {
   position: relative;
   border: 0;
   padding: 0;
+  z-index: 2;
 }
 
 .axis-score {
@@ -522,10 +552,9 @@ textarea {
 
 .axis-tooltip-panel {
   position: absolute;
-  left: 50%;
+  right: 0;
   top: calc(100% + 10px);
-  transform: translateX(-50%);
-  width: 220px;
+  width: min(280px, calc(100vw - 48px));
   padding: 10px 12px;
   border-radius: 14px;
   background: rgba(27, 38, 48, 0.96);
@@ -535,7 +564,7 @@ textarea {
   opacity: 0;
   pointer-events: none;
   transition: opacity 160ms ease;
-  z-index: 3;
+  z-index: 10;
 }
 
 .axis-tooltip-panel strong,

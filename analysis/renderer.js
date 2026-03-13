@@ -1,53 +1,179 @@
 const AXIS_DESCRIPTIONS = {
   "Cognitive Structure": {
-    short: "논리 구조 능력",
-    detail: "답변이 얼마나 단계적으로 구성되고 구조적으로 전개되는지"
+    ko: {
+      short: "논리 구조 능력",
+      detail: "답변이 얼마나 단계적으로 구성되고 구조적으로 전개되는지"
+    },
+    en: {
+      short: "Logical structure",
+      detail: "How clearly the answer is organized into steps, premises, and conclusions"
+    }
   },
   "Constraint Discipline": {
-    short: "형식 제약 준수 능력",
-    detail: "bullet point, 글자 수 제한, 금지어 등 요구사항을 지키는지"
+    ko: {
+      short: "형식 제약 준수 능력",
+      detail: "bullet point, 글자 수 제한, 금지어 등 요구사항을 지키는지"
+    },
+    en: {
+      short: "Constraint compliance",
+      detail: "How well the answer follows requested formats such as bullets, length limits, and forbidden words"
+    }
   },
   "Information Boundary": {
-    short: "정보 경계 인식",
-    detail: "알 수 없는 정보에 대해 추측하지 않고 경계를 인식하는지"
+    ko: {
+      short: "정보 경계 인식",
+      detail: "알 수 없는 정보에 대해 추측하지 않고 경계를 인식하는지"
+    },
+    en: {
+      short: "Information boundary awareness",
+      detail: "How well the model recognizes unknowns and avoids pretending to know them"
+    }
   },
   "Hallucination Control": {
-    short: "환각 억제 능력",
-    detail: "근거 없는 내용을 사실처럼 말하는 경향을 얼마나 억제하는지"
+    ko: {
+      short: "환각 억제 능력",
+      detail: "근거 없는 내용을 사실처럼 말하는 경향을 얼마나 억제하는지"
+    },
+    en: {
+      short: "Hallucination control",
+      detail: "How strongly the model avoids presenting unsupported claims as facts"
+    }
   },
   "Explanation Strategy": {
-    short: "설명 전략",
-    detail: "질문 목적과 대상에 맞게 설명 방식을 조정하는지"
+    ko: {
+      short: "설명 전략",
+      detail: "질문 목적과 대상에 맞게 설명 방식을 조정하는지"
+    },
+    en: {
+      short: "Explanation strategy",
+      detail: "How well the model adapts its explanation style to the task and audience"
+    }
   },
   "Self Correction": {
-    short: "자기 오류 수정 능력",
-    detail: "답변의 오류를 스스로 바로잡고 수정하는지"
+    ko: {
+      short: "자기 오류 수정 능력",
+      detail: "답변의 오류를 스스로 바로잡고 수정하는지"
+    },
+    en: {
+      short: "Self-correction",
+      detail: "How willing and able the model is to identify and repair its own mistakes"
+    }
   },
   "Response Density": {
-    short: "답변 길이 조절 능력",
-    detail: "질문 조건에 맞게 답변 길이와 밀도를 조절하는지"
+    ko: {
+      short: "답변 길이 조절 능력",
+      detail: "질문 조건에 맞게 답변 길이와 밀도를 조절하는지"
+    },
+    en: {
+      short: "Response density control",
+      detail: "How well the model adjusts answer length and density to fit the prompt requirements"
+    }
   },
   "Creativity–Accuracy": {
-    short: "창의성과 정확성 균형",
-    detail: "창의적 확장과 사실 기반 설명 사이에서 균형을 잡는지"
+    ko: {
+      short: "창의성과 정확성 균형",
+      detail: "창의적 확장과 사실 기반 설명 사이에서 균형을 잡는지"
+    },
+    en: {
+      short: "Creativity-accuracy balance",
+      detail: "How well the model balances imaginative expansion with factual reliability"
+    }
   },
   "Safety Alignment": {
-    short: "안전 정책 대응",
-    detail: "위험하거나 민감한 요청에 대해 안전하게 반응하는지"
+    ko: {
+      short: "안전 정책 대응",
+      detail: "위험하거나 민감한 요청에 대해 안전하게 반응하는지"
+    },
+    en: {
+      short: "Safety alignment",
+      detail: "How safely the model responds to risky, sensitive, or policy-relevant prompts"
+    }
   }
 };
 
-function initializePage(elements, surveyVersion) {
-  elements.surveyVersionLabel.textContent = `Survey Version ${surveyVersion}`;
+const UI_TEXT = {
+  ko: {
+    surveyVersion: "Survey Version",
+    analyzing: "분석 중...",
+    submit: "분석 후 저장하기",
+    reportType: "Report Type",
+    generatedTime: "Generated Time",
+    responseLength: "Response Length",
+    model: "Model",
+    noWeakness: "뚜렷한 취약 축이 감지되지 않았습니다.",
+    parsedCount: "파싱된 질문 수",
+    missingCount: "누락된 질문 수",
+    coverageRate: "응답 커버리지",
+    duplicateCount: "중복 질문 수",
+    formatIssues: "형식 이슈",
+    none: "없음",
+    metadataVersion: "질문 세트 버전",
+    axisCount: "행동 축 수",
+    storageCollection: "저장 컬렉션",
+    futureTargets: "향후 분리 대상",
+    curatorReady: "Question Curator 준비",
+    yes: "예",
+    no: "아니오",
+    primary: "Primary",
+    secondary: "Secondary",
+    overall: "Overall",
+    noAnswer: "응답 없음",
+    noAnswerNote: "이 질문에 대한 응답이 제출되지 않았습니다.",
+    strongest: "Strongest",
+    weakest: "Weakest",
+    strength: "강점",
+    weakness: "약점",
+    neutral: "보통",
+    copyDone: "리포트 요약을 복사했습니다.",
+    downloadDone: "리포트 파일을 다운로드했습니다.",
+    parsedSuffix: "문항 분석 완료"
+  },
+  en: {
+    surveyVersion: "Survey Version",
+    analyzing: "Analyzing...",
+    submit: "Analyze and Save",
+    reportType: "Report Type",
+    generatedTime: "Generated Time",
+    responseLength: "Response Length",
+    model: "Model",
+    noWeakness: "No major weakness axes were detected.",
+    parsedCount: "Parsed Questions",
+    missingCount: "Missing Questions",
+    coverageRate: "Coverage",
+    duplicateCount: "Duplicate Questions",
+    formatIssues: "Format Issues",
+    none: "None",
+    metadataVersion: "Survey Version",
+    axisCount: "Behavior Axes",
+    storageCollection: "Storage Collection",
+    futureTargets: "Future Split Targets",
+    curatorReady: "Question Curator Ready",
+    yes: "Yes",
+    no: "No",
+    primary: "Primary",
+    secondary: "Secondary",
+    overall: "Overall",
+    noAnswer: "No answer",
+    noAnswerNote: "No response was submitted for this question.",
+    strongest: "Strongest",
+    weakest: "Weakest",
+    strength: "Strength",
+    weakness: "Weakness",
+    neutral: "Neutral",
+    copyDone: "Copied the report summary.",
+    downloadDone: "Downloaded the report file.",
+    parsedSuffix: "questions analyzed"
+  }
+};
+
+function initializePage(elements, surveyVersion, locale = "ko") {
+  elements.surveyVersionLabel.textContent = `${UI_TEXT[locale].surveyVersion} ${surveyVersion}`;
   elements.surveyVersionInput.value = surveyVersion;
 }
 
 function bindResultActions(elements, handlers) {
   elements.insightSort?.addEventListener("change", (event) => {
     handlers.onSortChange?.(event.target.value);
-  });
-  elements.insightToggle?.addEventListener("click", () => {
-    handlers.onToggleInsights?.();
   });
   elements.copyReportBtn?.addEventListener("click", async () => {
     await handlers.onCopyReport?.();
@@ -63,9 +189,9 @@ function bindResultActions(elements, handlers) {
   });
 }
 
-function setLoadingState(elements, isLoading, message = "") {
+function setLoadingState(elements, isLoading, message = "", locale = "ko") {
   elements.submitButton.disabled = isLoading;
-  elements.submitButton.textContent = isLoading ? "분석 중..." : "분석 후 저장하기";
+  elements.submitButton.textContent = isLoading ? UI_TEXT[locale].analyzing : UI_TEXT[locale].submit;
   if (elements.loadingOverlay) {
     elements.loadingOverlay.hidden = !isLoading;
   }
@@ -85,41 +211,43 @@ function showStatusMessage(statusElement, message) {
 function renderResults(elements, payload, overrides = {}) {
   const uiState = {
     sortMode: overrides.sortMode ?? payload.uiState?.sortMode ?? "question-order",
-    showAllInsights: overrides.showAllInsights ?? payload.uiState?.showAllInsights ?? false
+    showAllInsights: true,
+    locale: overrides.locale ?? payload.uiState?.locale ?? "ko"
   };
   payload.uiState = uiState;
+  const text = UI_TEXT[uiState.locale];
 
   elements.resultsSection.hidden = false;
   document.body.classList.add("modal-open");
-  elements.completenessLabel.textContent = `${payload.parserSummary.parsedCount}/${payload.analysisMeta.totalQuestions} parsed`;
+  elements.completenessLabel.textContent = `${payload.parserSummary.parsedCount}/${payload.analysisMeta.totalQuestions} ${text.parsedSuffix}`;
   elements.summaryText.textContent = payload.summary;
   elements.diagnosticNotes.textContent = payload.report.diagnosticSummary;
   renderAxisSummary(elements.strongAxes, payload.report.strongestAxes);
   renderAxisSummary(elements.weakAxes, payload.report.weakestAxes);
 
   renderReportMeta(elements.reportMeta, payload);
-  renderAxisCards(elements.axisScores, payload.axisScores);
-  renderAxisTable(elements.axisTableBody, payload.axisScores);
+  renderAxisCards(elements.axisScores, payload.axisScores, uiState.locale);
+  renderAxisTable(elements.axisTableBody, payload.axisScores, uiState.locale);
   renderList(elements.recommendedUsage, payload.report.recommendedUsage);
   renderList(
     elements.behavioralWarnings,
     payload.report.behavioralWarnings.length
       ? payload.report.behavioralWarnings
-      : ["뚜렷한 취약 축이 감지되지 않았습니다."]
+      : [text.noWeakness]
   );
   renderList(elements.parseSummary, [
-    `파싱된 질문 수: ${payload.parserSummary.parsedCount}`,
-    `누락된 질문 수: ${payload.parserSummary.missingCount}`,
-    `응답 커버리지: ${payload.parserSummary.coverageRate}%`,
-    `중복 질문 수: ${payload.parserSummary.duplicateQuestionIds.length}`,
-    `형식 이슈: ${payload.parserSummary.formatIssues.length ? payload.parserSummary.formatIssues.join(" / ") : "없음"}`
+    `${text.parsedCount}: ${payload.parserSummary.parsedCount}`,
+    `${text.missingCount}: ${payload.parserSummary.missingCount}`,
+    `${text.coverageRate}: ${payload.parserSummary.coverageRate}%`,
+    `${text.duplicateCount}: ${payload.parserSummary.duplicateQuestionIds.length}`,
+    `${text.formatIssues}: ${payload.parserSummary.formatIssues.length ? payload.parserSummary.formatIssues.join(" / ") : text.none}`
   ]);
   renderList(elements.metadataSummary, [
-    `질문 세트 버전: ${payload.surveyVersion}`,
-    `행동 축 수: ${payload.analysisMeta.totalAxes}`,
-    `저장 컬렉션: surveyResponses`,
-    `향후 분리 대상: ${payload.storageTargets.future.join(", ")}`,
-    `Question Curator 준비: ${payload.analysisMeta.readyForQuestionCurator ? "예" : "아니오"}`
+    `${text.metadataVersion}: ${payload.surveyVersion}`,
+    `${text.axisCount}: ${payload.analysisMeta.totalAxes}`,
+    `${text.storageCollection}: surveyResponses`,
+    `${text.futureTargets}: ${payload.storageTargets.future.join(", ")}`,
+    `${text.curatorReady}: ${payload.analysisMeta.readyForQuestionCurator ? text.yes : text.no}`
   ]);
   renderQuestionInsights(elements, payload.questionResponses, uiState);
 
@@ -127,13 +255,14 @@ function renderResults(elements, payload, overrides = {}) {
 }
 
 function renderReportMeta(container, payload) {
+  const text = UI_TEXT[payload.uiState?.locale || "ko"];
   const metaItems = [
-    ["Report Type", payload.report.reportHeader.reportType],
-    ["Survey Version", payload.surveyVersion],
+    [text.reportType, payload.report.reportHeader.reportType],
+    [text.surveyVersion, payload.surveyVersion],
     ["Analysis ID", payload.report.reportHeader.analysisId],
-    ["Generated Time", payload.report.reportHeader.generatedAt],
-    ["Response Length", `${payload.report.responseLength} chars`],
-    ["Model", payload.modelName || "미입력"]
+    [text.generatedTime, payload.report.reportHeader.generatedAt],
+    [text.responseLength, `${payload.report.responseLength} chars`],
+    [text.model, payload.modelName || text.none]
   ];
 
   container.innerHTML = "";
@@ -145,9 +274,10 @@ function renderReportMeta(container, payload) {
   });
 }
 
-function renderAxisCards(container, axisScores) {
+function renderAxisCards(container, axisScores, locale = "ko") {
   container.innerHTML = "";
   Object.entries(axisScores).forEach(([axis, score]) => {
+    const description = AXIS_DESCRIPTIONS[axis][locale] || AXIS_DESCRIPTIONS[axis].ko;
     const card = document.createElement("article");
     card.className = "vector-card";
     card.style.setProperty("--score", score);
@@ -157,29 +287,30 @@ function renderAxisCards(container, axisScores) {
         <button class="axis-tooltip" type="button" aria-label="${axis} 설명">
           i
           <span class="axis-tooltip-panel">
-            <strong>${AXIS_DESCRIPTIONS[axis].short}</strong>
-            <span>${AXIS_DESCRIPTIONS[axis].detail}</span>
+            <strong>${description.short}</strong>
+            <span>${description.detail}</span>
           </span>
         </button>
       </div>
       <div class="axis-score">${score}</div>
-      <p class="axis-description">${AXIS_DESCRIPTIONS[axis].short}</p>
-      <span class="score-badge ${getStatusClass(score)}">${getStatusLabel(score)}</span>
+      <p class="axis-description">${description.short}</p>
+      <span class="score-badge ${getStatusClass(score)}">${getStatusLabel(score, locale)}</span>
       <div class="axis-bar"><span style="width:${score}%"></span></div>
     `;
     container.appendChild(card);
   });
 }
 
-function renderAxisTable(container, axisScores) {
+function renderAxisTable(container, axisScores, locale = "ko") {
   container.innerHTML = "";
   Object.entries(axisScores).forEach(([axis, score]) => {
+    const description = AXIS_DESCRIPTIONS[axis][locale] || AXIS_DESCRIPTIONS[axis].ko;
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${axis}</td>
       <td>${score}</td>
-      <td>${AXIS_DESCRIPTIONS[axis].detail}</td>
-      <td><span class="score-badge ${getStatusClass(score)}">${getStatusLabel(score)}</span></td>
+      <td>${description.detail}</td>
+      <td><span class="score-badge ${getStatusClass(score)}">${getStatusLabel(score, locale)}</span></td>
     `;
     container.appendChild(row);
   });
@@ -187,7 +318,6 @@ function renderAxisTable(container, axisScores) {
 
 function renderQuestionInsights(elements, questionResponses, uiState) {
   const sorted = [...questionResponses]
-    .filter((response) => response.answerText)
     .sort((left, right) => {
       if (uiState.sortMode === "highest-score") {
         return right.score.overall - left.score.overall;
@@ -198,9 +328,13 @@ function renderQuestionInsights(elements, questionResponses, uiState) {
       return compareQuestionNumbers(left.questionNumber, right.questionNumber);
     });
 
-  const visibleItems = uiState.showAllInsights ? sorted : sorted.slice(0, 12);
+  const visibleItems = sorted;
+  const text = UI_TEXT[uiState.locale];
   elements.questionAnalysisList.innerHTML = "";
   visibleItems.forEach((response) => {
+    const answerPreview = response.answerText
+      ? `${response.answerText.slice(0, 220)}${response.answerText.length > 220 ? "..." : ""}`
+      : text.noAnswer;
     const item = document.createElement("article");
     item.className = "question-analysis-item";
     item.innerHTML = `
@@ -208,12 +342,12 @@ function renderQuestionInsights(elements, questionResponses, uiState) {
         <h4>${response.questionNumber}</h4>
         <span class="pill">${response.strategyType}</span>
       </div>
-      <p>${response.answerText.slice(0, 220)}${response.answerText.length > 220 ? "..." : ""}</p>
-      <p class="analysis-note">${response.notes}</p>
+      <p>${answerPreview}</p>
+      <p class="analysis-note">${response.answerText ? response.notes : text.noAnswerNote}</p>
       <div class="analysis-meta">
-        <span class="pill">Primary ${response.primaryAxis}: ${response.score.primary}</span>
-        <span class="pill">Secondary: ${response.score.secondary}</span>
-        <span class="pill">Overall: ${response.score.overall}</span>
+        <span class="pill">${text.primary} ${response.primaryAxis}: ${response.score.primary}</span>
+        <span class="pill">${text.secondary}: ${response.score.secondary}</span>
+        <span class="pill">${text.overall}: ${response.score.overall}</span>
       </div>
       <div class="analysis-tags">
         ${response.analysisTags.map((tag) => `<span class="pill">${tag}</span>`).join("")}
@@ -224,9 +358,6 @@ function renderQuestionInsights(elements, questionResponses, uiState) {
 
   if (elements.insightSort) {
     elements.insightSort.value = uiState.sortMode;
-  }
-  if (elements.insightToggle) {
-    elements.insightToggle.textContent = uiState.showAllInsights ? "12개만 보기" : "전체 보기";
   }
 }
 
@@ -253,10 +384,11 @@ function renderAxisSummary(container, axisEntries) {
   });
 }
 
-function getStatusLabel(score) {
-  if (score >= 80) return "Strength";
-  if (score < 68) return "Weakness";
-  return "Neutral";
+function getStatusLabel(score, locale = "ko") {
+  const text = UI_TEXT[locale];
+  if (score >= 80) return text.strength;
+  if (score < 68) return text.weakness;
+  return text.neutral;
 }
 
 function getStatusClass(score) {

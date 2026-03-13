@@ -562,8 +562,9 @@ textarea {
   width: min(280px, calc(100vw - 48px));
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(27, 38, 48, 0.96);
-  color: #f9fafb;
+  background: #fffaf2;
+  color: #1f2933;
+  border: 1px solid rgba(40, 75, 99, 0.18);
   text-align: left;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
   opacity: 0;
@@ -592,7 +593,7 @@ textarea {
   margin-top: 6px;
   font-size: 12px;
   line-height: 1.5;
-  color: rgba(249, 250, 251, 0.84);
+  color: #4b5b68;
 }
 
 .axis-tooltip:hover .axis-tooltip-panel,

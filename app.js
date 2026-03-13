@@ -37,6 +37,7 @@ const elements = {
   surveySection: document.getElementById("surveySection"),
   analysisForm: document.getElementById("analysisForm"),
   submitButton: document.getElementById("submitBtn"),
+  viewResultsBtn: document.getElementById("viewResultsBtn"),
   statusMessage: document.getElementById("statusMessage"),
   providerNameInput: document.getElementById("providerName"),
   modelNameInput: document.getElementById("modelName"),
@@ -146,6 +147,7 @@ const UI_COPY = {
     copyReportBtn: "리포트 복사",
     downloadReportBtn: "리포트 다운로드",
     closeReportBtn: "닫기",
+    viewResultsBtn: "결과 보기",
     loadingParsing: "질문별 응답을 파싱하는 중",
     loadingAnalyzing: "질문별 행동 특성을 분석하는 중",
     loadingScoring: "행동 벡터를 계산하는 중",
@@ -227,6 +229,7 @@ const UI_COPY = {
     copyReportBtn: "Copy Report",
     downloadReportBtn: "Download Report",
     closeReportBtn: "Close",
+    viewResultsBtn: "View Results",
     loadingParsing: "Parsing question-by-question responses",
     loadingAnalyzing: "Analyzing behavioral traits by question",
     loadingScoring: "Calculating the behavioral vector",
@@ -242,6 +245,7 @@ let latestRenderedPayload = null;
 
 initializePage(elements, surveyVersion, currentLocale);
 applyLocale(currentLocale);
+updateResultsButtonState(false);
 bindResultActions(elements, {
   getPayload: () => latestRenderedPayload,
   onSortChange: (sortMode) => {
@@ -363,13 +367,20 @@ elements.analysisForm.addEventListener("submit", async (event) => {
 
     await ensureMinimumLoadingTime(loadingStartedAt, 3000);
     setLoadingState(elements, false, "", currentLocale);
+    updateResultsButtonState(true);
     renderResults(elements, latestRenderedPayload, { locale: currentLocale });
     showStatusMessage(elements.statusMessage, UI_COPY[currentLocale].savedStatus);
   } catch (error) {
     console.error("Submission pipeline error:", error);
+    if (latestRenderedPayload) {
+      updateResultsButtonState(true);
+    }
     await ensureMinimumLoadingTime(loadingStartedAt, 3000);
     setLoadingState(elements, false, "", currentLocale);
     showStatusMessage(elements.statusMessage, `제출 중 오류 발생: ${error.message}`);
+    if (latestRenderedPayload) {
+      renderResults(elements, latestRenderedPayload, { locale: currentLocale });
+    }
   }
 });
 
@@ -426,6 +437,14 @@ function initializeProviderModelControls(elements) {
 function initializeLanguageControls(elements) {
   elements.langKoBtn?.addEventListener("click", () => setLocale("ko"));
   elements.langEnBtn?.addEventListener("click", () => setLocale("en"));
+  elements.viewResultsBtn?.addEventListener("click", () => {
+    if (latestRenderedPayload) {
+      renderResults(elements, latestRenderedPayload, {
+        sortMode: latestRenderedPayload.uiState?.sortMode ?? "question-order",
+        locale: currentLocale
+      });
+    }
+  });
 }
 
 function setLocale(locale) {
@@ -506,6 +525,8 @@ function applyLocale(locale) {
     copyReportBtn: copy.copyReportBtn,
     downloadReportBtn: copy.downloadReportBtn,
     closeReportBtn: copy.closeReportBtn
+    ,
+    viewResultsBtn: copy.viewResultsBtn
   };
 
   Object.entries(textTargets).forEach(([id, value]) => {
@@ -553,6 +574,9 @@ function applyLocale(locale) {
   updateInsightSortLabels(locale);
   elements.langKoBtn?.classList.toggle("is-active", locale === "ko");
   elements.langEnBtn?.classList.toggle("is-active", locale === "en");
+  if (elements.viewResultsBtn && !elements.viewResultsBtn.hidden) {
+    elements.viewResultsBtn.textContent = copy.viewResultsBtn;
+  }
 }
 
 function updateInsightSortLabels(locale) {
@@ -595,5 +619,17 @@ async function ensureMinimumLoadingTime(startedAt, minimumMs) {
   const remaining = minimumMs - (Date.now() - startedAt);
   if (remaining > 0) {
     await new Promise((resolve) => window.setTimeout(resolve, remaining));
+  }
+}
+
+function updateResultsButtonState(hasResults) {
+  if (!elements.viewResultsBtn) {
+    return;
+  }
+
+  elements.viewResultsBtn.hidden = !hasResults;
+  elements.viewResultsBtn.disabled = !hasResults;
+  if (hasResults) {
+    elements.viewResultsBtn.textContent = UI_COPY[currentLocale].viewResultsBtn;
   }
 }

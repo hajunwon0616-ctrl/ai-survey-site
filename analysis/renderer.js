@@ -477,7 +477,8 @@ function renderRadarChart(canvas, axisScores, locale = "ko") {
   const height = canvas.height;
   const centerX = width / 2;
   const centerY = height / 2;
-  const radius = Math.min(width, height) * 0.32;
+  const chartPadding = 86;
+  const radius = Math.min(width, height) * 0.5 - chartPadding;
   const axes = Object.keys(axisScores);
   const values = Object.values(axisScores);
   context.clearRect(0, 0, width, height);
@@ -505,7 +506,8 @@ function renderRadarChart(canvas, axisScores, locale = "ko") {
     context.fillStyle = "#284b63";
     context.font = "600 12px Segoe UI";
     context.textAlign = x >= centerX ? "left" : "right";
-    context.fillText(label.short, x + (x >= centerX ? 10 : -10), y);
+    context.textBaseline = "middle";
+    context.fillText(label.short, x + (x >= centerX ? 14 : -14), y);
   });
 
   context.beginPath();

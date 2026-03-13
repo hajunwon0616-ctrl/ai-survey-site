@@ -299,6 +299,10 @@ function renderAxisCards(container, axisScores, locale = "ko") {
     `;
     container.appendChild(card);
   });
+
+  window.requestAnimationFrame(() => {
+    adjustTooltipAlignment(container);
+  });
 }
 
 function renderAxisTable(container, axisScores, locale = "ko") {
@@ -402,6 +406,24 @@ function compareQuestionNumbers(left, right) {
   const [rightMain, rightSub = "0"] = right.replace("Q", "").split("-");
   const mainGap = Number(leftMain) - Number(rightMain);
   return mainGap !== 0 ? mainGap : Number(leftSub) - Number(rightSub);
+}
+
+function adjustTooltipAlignment(container) {
+  const tooltips = container.querySelectorAll(".axis-tooltip");
+  tooltips.forEach((tooltip) => {
+    tooltip.classList.remove("tooltip-align-left", "tooltip-align-right");
+    const panel = tooltip.querySelector(".axis-tooltip-panel");
+    if (!panel) {
+      return;
+    }
+
+    const panelRect = panel.getBoundingClientRect();
+    if (panelRect.left < 16) {
+      tooltip.classList.add("tooltip-align-left");
+    } else if (panelRect.right > window.innerWidth - 16) {
+      tooltip.classList.add("tooltip-align-right");
+    }
+  });
 }
 
 export {

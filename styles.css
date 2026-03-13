@@ -330,14 +330,18 @@ textarea {
 .report-modal {
   position: fixed;
   inset: 0;
-  z-index: 30;
 }
 
 .loading-overlay {
+  z-index: 50;
   display: grid;
   place-items: center;
   background: rgba(27, 38, 48, 0.46);
   backdrop-filter: blur(8px);
+}
+
+.report-modal {
+  z-index: 30;
 }
 
 .loading-card {
@@ -552,8 +556,9 @@ textarea {
 
 .axis-tooltip-panel {
   position: absolute;
-  right: 0;
+  left: 50%;
   top: calc(100% + 10px);
+  transform: translateX(-50%);
   width: min(280px, calc(100vw - 48px));
   padding: 10px 12px;
   border-radius: 14px;
@@ -565,6 +570,17 @@ textarea {
   pointer-events: none;
   transition: opacity 160ms ease;
   z-index: 10;
+}
+
+.axis-tooltip.tooltip-align-left .axis-tooltip-panel {
+  left: 0;
+  transform: none;
+}
+
+.axis-tooltip.tooltip-align-right .axis-tooltip-panel {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
 .axis-tooltip-panel strong,

@@ -346,8 +346,6 @@ elements.analysisForm.addEventListener("submit", async (event) => {
         locale: currentLocale
       }
     };
-
-    renderResults(elements, latestRenderedPayload, { locale: currentLocale });
     setLoadingState(elements, true, UI_COPY[currentLocale].loadingSaving, currentLocale);
 
     const docRef = await addDoc(collection(db, "surveyResponses"), {
@@ -363,14 +361,15 @@ elements.analysisForm.addEventListener("submit", async (event) => {
       }
     };
 
+    await ensureMinimumLoadingTime(loadingStartedAt, 3000);
+    setLoadingState(elements, false, "", currentLocale);
     renderResults(elements, latestRenderedPayload, { locale: currentLocale });
     showStatusMessage(elements.statusMessage, UI_COPY[currentLocale].savedStatus);
   } catch (error) {
     console.error("Submission pipeline error:", error);
-    showStatusMessage(elements.statusMessage, `제출 중 오류 발생: ${error.message}`);
-  } finally {
     await ensureMinimumLoadingTime(loadingStartedAt, 3000);
     setLoadingState(elements, false, "", currentLocale);
+    showStatusMessage(elements.statusMessage, `제출 중 오류 발생: ${error.message}`);
   }
 });
 

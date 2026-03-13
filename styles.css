@@ -28,6 +28,10 @@ body {
   min-height: 100vh;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .container {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
@@ -260,6 +264,7 @@ textarea {
 }
 
 select {
+  width: 100%;
   border-radius: 14px;
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.72);
@@ -294,7 +299,127 @@ textarea {
   margin-bottom: 40px;
 }
 
+.loading-overlay,
+.report-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.loading-overlay {
+  display: grid;
+  place-items: center;
+  background: rgba(27, 38, 48, 0.46);
+  backdrop-filter: blur(8px);
+}
+
+.loading-card {
+  width: min(92vw, 440px);
+  padding: 28px;
+  border-radius: 28px;
+  background: rgba(255, 251, 246, 0.96);
+  border: 1px solid rgba(40, 75, 99, 0.12);
+  box-shadow: 0 24px 60px rgba(12, 22, 30, 0.2);
+  text-align: center;
+}
+
+.loading-eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.loading-pulse {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 111, 59, 0.9) 0%, rgba(201, 111, 59, 0.2) 60%, transparent 70%);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+.report-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.56);
+  backdrop-filter: blur(10px);
+}
+
+.report-window {
+  position: relative;
+  z-index: 1;
+  width: min(1200px, calc(100vw - 28px));
+  height: min(92vh, 980px);
+  margin: 4vh auto;
+  padding: 28px;
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, rgba(250, 246, 239, 0.98), rgba(241, 236, 228, 0.98));
+  border: 1px solid rgba(40, 75, 99, 0.14);
+  box-shadow: 0 28px 80px rgba(12, 22, 30, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.report-window-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(40, 75, 99, 0.12);
+}
+
+.report-subtitle {
+  margin: 8px 0 0;
+}
+
+.report-window-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.report-window-body {
+  overflow: auto;
+  padding-right: 6px;
+  margin-top: 18px;
+  display: grid;
+  gap: 18px;
+}
+
+.report-panel {
+  background: rgba(255, 252, 247, 0.84);
+  border: 1px solid rgba(40, 75, 99, 0.1);
+  border-radius: 24px;
+  padding: 20px;
+}
+
+.hero-summary {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(40, 75, 99, 0.06);
+  border: 1px solid rgba(40, 75, 99, 0.08);
+}
+
+.report-meta-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
 .results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 8px;
 }
 
@@ -306,6 +431,7 @@ textarea {
 .vector-card {
   position: relative;
   overflow: hidden;
+  padding-bottom: 16px;
 }
 
 .vector-card::after {
@@ -345,7 +471,10 @@ textarea {
   color: var(--secondary);
   font-size: 12px;
   font-weight: 800;
-  cursor: help;
+  cursor: pointer;
+  position: relative;
+  border: 0;
+  padding: 0;
 }
 
 .axis-score {
@@ -357,6 +486,69 @@ textarea {
 .axis-description {
   margin: 0 0 12px;
   font-size: 14px;
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  width: fit-content;
+  padding: 4px 10px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.score-badge.is-strong {
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+}
+
+.score-badge.is-neutral {
+  background: rgba(180, 83, 9, 0.12);
+  color: #b45309;
+}
+
+.score-badge.is-weak {
+  background: rgba(185, 28, 28, 0.12);
+  color: #b91c1c;
+}
+
+.axis-tooltip-panel {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(27, 38, 48, 0.96);
+  color: #f9fafb;
+  text-align: left;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  z-index: 3;
+}
+
+.axis-tooltip-panel strong,
+.axis-tooltip-panel span {
+  display: block;
+}
+
+.axis-tooltip-panel span {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(249, 250, 251, 0.84);
+}
+
+.axis-tooltip:hover .axis-tooltip-panel,
+.axis-tooltip:focus-visible .axis-tooltip-panel {
+  opacity: 1;
 }
 
 .axis-bar {
@@ -398,7 +590,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.76);
 }
 
 .question-analysis-item h4 {
@@ -440,6 +632,27 @@ textarea {
 
 .summary-panel {
   margin-bottom: 18px;
+}
+
+.report-columns {
+  align-items: start;
+}
+
+.summary-chip-group {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.summary-chip-block strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.summary-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .prescription-sheet {
@@ -502,6 +715,52 @@ textarea {
   margin-bottom: 18px;
 }
 
+.strength-weakness-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.strength-card {
+  border-color: rgba(15, 118, 110, 0.18);
+  background: rgba(240, 253, 250, 0.8);
+}
+
+.weakness-card {
+  border-color: rgba(185, 28, 28, 0.16);
+  background: rgba(254, 242, 242, 0.78);
+}
+
+.axis-table-wrap {
+  overflow: auto;
+}
+
+.axis-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.axis-table th,
+.axis-table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(40, 75, 99, 0.1);
+  vertical-align: top;
+}
+
+.axis-table th {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--secondary);
+}
+
+.toolbar-copy {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
 .insight-toolbar,
 .insight-controls {
   display: flex;
@@ -550,6 +809,8 @@ code {
 
   .prescription-header,
   .prescription-meta-item,
+  .report-window-header,
+  .report-window-actions,
   .insight-toolbar,
   .insight-controls,
   .question-analysis-header {
@@ -559,5 +820,20 @@ code {
 
   textarea {
     min-height: 280px;
+  }
+
+  .axis-tooltip-panel {
+    left: auto;
+    right: 0;
+    transform: none;
+    width: 200px;
+  }
+
+  .report-window {
+    width: calc(100vw - 12px);
+    height: calc(100vh - 12px);
+    margin: 6px;
+    padding: 18px;
+    border-radius: 24px;
   }
 }

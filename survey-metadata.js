@@ -134,17 +134,29 @@ function buildSurveyPrompt(version = SURVEY_VERSION) {
   const surveyDefinition = getSurveyDefinition(version);
   const header = [
     "AI 행동 성향 분석 설문",
+    "",
+    "이 설문은 AI의 지식 수준을 평가하는 것이 아니라",
+    "AI의 행동 성향을 분석하기 위한 것입니다.",
+    "",
     `Survey Version: ${surveyDefinition.version}`,
     "",
-    "아래 형식을 유지해 각 문항에 답변하십시오.",
-    "형식 예시:",
+    "답변 규칙",
+    "1. 모든 질문에 순서대로 답하십시오.",
+    "2. 질문 번호를 유지하십시오.",
+    "3. 질문을 다시 설명하지 마십시오.",
+    "4. 질문 사이에 추가 설명을 넣지 마십시오.",
+    "5. 각 질문 아래에 바로 답변하십시오.",
+    "6. 모든 답변은 하나의 메시지로 작성하십시오.",
+    "",
+    "형식 예시",
     "Q1:",
     "답변",
     "",
     "Q1-1:",
     "답변",
     "",
-    "모든 답변이 끝나면 마지막 줄에 [END OF SURVEY]를 추가하십시오.",
+    "마지막 줄",
+    "[END OF SURVEY]",
     ""
   ];
 

@@ -30,16 +30,21 @@ const surveyVersion = getSurveyVersion();
 const elements = {
   startBtn: document.getElementById("startBtn"),
   downloadBtn: document.getElementById("downloadBtn"),
+  shortcutLinks: document.querySelectorAll(".shortcut-link"),
   surveySection: document.getElementById("surveySection"),
   analysisForm: document.getElementById("analysisForm"),
   submitButton: document.getElementById("submitBtn"),
   statusMessage: document.getElementById("statusMessage"),
   providerNameInput: document.getElementById("providerName"),
   modelNameInput: document.getElementById("modelName"),
-  analystLabelInput: document.getElementById("analystLabel"),
+  testLabelInput: document.getElementById("testLabel"),
   surveyVersionInput: document.getElementById("surveyVersionInput"),
   rawResponseInput: document.getElementById("rawResponse"),
   resultsSection: document.getElementById("resultsSection"),
+  loadingOverlay: document.getElementById("loadingOverlay"),
+  loadingMessage: document.getElementById("loadingMessage"),
+  reportBackdrop: document.getElementById("reportBackdrop"),
+  closeReportBtn: document.getElementById("closeReportBtn"),
   surveyVersionLabel: document.getElementById("surveyVersionLabel"),
   completenessLabel: document.getElementById("completenessLabel"),
   reportMeta: document.getElementById("reportMeta"),
@@ -47,13 +52,23 @@ const elements = {
   recommendedUsage: document.getElementById("recommendedUsage"),
   behavioralWarnings: document.getElementById("behavioralWarnings"),
   axisScores: document.getElementById("axisScores"),
+  axisTableBody: document.getElementById("axisTableBody"),
+  strongAxes: document.getElementById("strongAxes"),
+  weakAxes: document.getElementById("weakAxes"),
   summaryText: document.getElementById("summaryText"),
   parseSummary: document.getElementById("parseSummary"),
   metadataSummary: document.getElementById("metadataSummary"),
   questionAnalysisList: document.getElementById("questionAnalysisList"),
   insightSort: document.getElementById("insightSort"),
   insightToggle: document.getElementById("insightToggle"),
-  copyReportBtn: document.getElementById("copyReportBtn")
+  copyReportBtn: document.getElementById("copyReportBtn"),
+  downloadReportBtn: document.getElementById("downloadReportBtn")
+};
+
+const PROVIDER_MODELS = {
+  ChatGPT: ["GPT-5", "GPT-4o", "GPT-4o mini", "GPT-4.1", "GPT-4.1 mini"],
+  Claude: ["Claude Opus", "Claude Sonnet", "Claude Haiku"],
+  Gemini: ["Gemini 2.0 Ultra", "Gemini 2.0 Pro", "Gemini 1.5 Pro"]
 };
 
 let latestRenderedPayload = null;
@@ -81,8 +96,30 @@ bindResultActions(elements, {
     const reportText = buildCopyableReport(latestRenderedPayload);
     await navigator.clipboard.writeText(reportText);
     showStatusMessage(elements.statusMessage, "리포트 요약을 복사했습니다.");
+  },
+  onDownloadReport: () => {
+    if (!latestRenderedPayload) {
+      return;
+    }
+
+    const reportText = buildCopyableReport(latestRenderedPayload);
+    const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${latestRenderedPayload.report.reportHeader.analysisId}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showStatusMessage(elements.statusMessage, "리포트 파일을 다운로드했습니다.");
+  },
+  onCloseReport: () => {
+    closeResultsModal(elements);
   }
 });
+
+initializeProviderModelControls(elements);
 
 elements.startBtn.addEventListener("click", () => {
   elements.surveySection.scrollIntoView({ behavior: "smooth" });
@@ -103,17 +140,20 @@ elements.downloadBtn.addEventListener("click", () => {
 
 elements.analysisForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  setLoadingState(elements, true, "응답을 파싱하고 분석 중입니다...");
+  setLoadingState(elements, true, "질문별 응답을 파싱하는 중");
 
   const providerName = elements.providerNameInput.value.trim();
   const modelName = elements.modelNameInput.value.trim();
-  const analystLabel = elements.analystLabelInput.value.trim();
+  const testLabel = elements.testLabelInput.value.trim();
   const rawResponse = elements.rawResponseInput.value.trim();
 
   try {
     const parsed = parseSurveyResponse(rawResponse, surveyDefinition);
+    setLoadingState(elements, true, "질문별 행동 특성을 분석하는 중");
     const analyzedResponses = analyzeResponses(parsed.answersByQuestion, surveyDefinition);
+    setLoadingState(elements, true, "행동 벡터를 계산하는 중");
     const axisScores = calculateAxisVector(analyzedResponses, surveyDefinition.axes);
+    setLoadingState(elements, true, "리포트를 생성하는 중");
     const report = buildPrescriptionReport({
       axisScores,
       surveyVersion,
@@ -124,7 +164,7 @@ elements.analysisForm.addEventListener("submit", async (event) => {
     const payload = buildSubmissionPayload({
       providerName,
       modelName,
-      analystLabel,
+      testLabel,
       surveyVersion,
       rawResponse,
       surveyDefinition,
@@ -192,4 +232,52 @@ function buildCopyableReport(payload) {
     "Behavioral Warnings",
     warningLines
   ].join("\n");
+}
+
+function initializeProviderModelControls(elements) {
+  elements.providerNameInput.addEventListener("change", () => {
+    syncModelOptions(elements, elements.providerNameInput.value);
+  });
+
+  elements.shortcutLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const provider = link.dataset.provider || "";
+      if (!provider) {
+        return;
+      }
+
+      elements.providerNameInput.value = provider;
+      syncModelOptions(elements, provider);
+    });
+  });
+
+  syncModelOptions(elements, elements.providerNameInput.value);
+}
+
+function syncModelOptions(elements, providerName) {
+  const options = PROVIDER_MODELS[providerName] || [];
+  elements.modelNameInput.innerHTML = "";
+
+  if (!options.length) {
+    elements.modelNameInput.disabled = true;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "먼저 AI 서비스를 선택하세요";
+    elements.modelNameInput.appendChild(placeholder);
+    return;
+  }
+
+  elements.modelNameInput.disabled = false;
+  options.forEach((modelName, index) => {
+    const option = document.createElement("option");
+    option.value = modelName;
+    option.textContent = modelName;
+    option.selected = index === 0;
+    elements.modelNameInput.appendChild(option);
+  });
+}
+
+function closeResultsModal(elements) {
+  elements.resultsSection.hidden = true;
+  document.body.classList.remove("modal-open");
 }

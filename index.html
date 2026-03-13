@@ -27,9 +27,9 @@
             <p>질문지를 받은 뒤 바로 원하는 AI 창으로 이동할 수 있습니다.</p>
           </div>
           <div class="shortcut-links">
-            <a class="shortcut-link" href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer">ChatGPT 열기</a>
-            <a class="shortcut-link" href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">Gemini 열기</a>
-            <a class="shortcut-link" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude 열기</a>
+            <a class="shortcut-link" data-provider="ChatGPT" href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer">ChatGPT 열기</a>
+            <a class="shortcut-link" data-provider="Gemini" href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">Gemini 열기</a>
+            <a class="shortcut-link" data-provider="Claude" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude 열기</a>
           </div>
         </div>
       </div>
@@ -75,15 +75,22 @@
           <div class="form-grid">
             <div class="field">
               <label for="providerName">AI 서비스명</label>
-              <input id="providerName" name="providerName" type="text" placeholder="예: ChatGPT, Claude, Gemini">
+              <select id="providerName" name="providerName" required>
+                <option value="">서비스 선택</option>
+                <option value="ChatGPT">ChatGPT</option>
+                <option value="Claude">Claude</option>
+                <option value="Gemini">Gemini</option>
+              </select>
             </div>
             <div class="field">
               <label for="modelName">모델명</label>
-              <input id="modelName" name="modelName" type="text" placeholder="예: GPT-5, Claude Sonnet">
+              <select id="modelName" name="modelName" required disabled>
+                <option value="">먼저 AI 서비스를 선택하세요</option>
+              </select>
             </div>
             <div class="field">
-              <label for="analystLabel">분석 라벨</label>
-              <input id="analystLabel" name="analystLabel" type="text" placeholder="예: GPT-5 실험 1차">
+              <label for="testLabel">테스트 라벨</label>
+              <input id="testLabel" name="testLabel" type="text" placeholder="예: GPT 비교 테스트, 3월 실험">
             </div>
             <div class="field">
               <label for="surveyVersionInput">질문 세트 버전</label>
@@ -125,73 +132,144 @@
       </div>
     </section>
 
-    <section class="panel results-panel" id="resultsSection" hidden>
-      <div class="section-header">
-        <h2>분석 결과</h2>
-        <span class="section-kicker" id="completenessLabel"></span>
-      </div>
+  </div>
 
-      <div class="prescription-sheet">
-        <div class="prescription-header">
-          <div>
-            <p class="prescription-label">AI Behavioral Prescription</p>
-            <h3>AI 행동 진단 리포트</h3>
-          </div>
-          <div class="prescription-meta" id="reportMeta"></div>
+  <div class="loading-overlay" id="loadingOverlay" hidden>
+    <div class="loading-card">
+      <div class="loading-pulse"></div>
+      <p class="loading-eyebrow">AI Behavior Analysis</p>
+      <h2>응답을 분석 중입니다</h2>
+      <p id="loadingMessage">질문별 응답을 파싱하는 중</p>
+    </div>
+  </div>
+
+  <div class="report-modal" id="resultsSection" hidden>
+    <div class="report-backdrop" id="reportBackdrop"></div>
+    <section class="report-window" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+      <div class="report-window-header">
+        <div>
+          <p class="prescription-label">AI Behavior Analysis</p>
+          <h2 id="reportTitle">AI 행동 분석 리포트</h2>
+          <p class="report-subtitle">AI 행동 프로파일과 사용 전략을 한 화면에서 확인하는 결과 리포트입니다.</p>
         </div>
-
-        <div class="results-columns prescription-top">
-          <div class="results-card">
-            <h3>진단 소견</h3>
-            <p id="diagnosticNotes"></p>
-          </div>
-          <div class="results-card">
-            <h3>사용 처방</h3>
-            <ul id="recommendedUsage" class="bullet-list"></ul>
-          </div>
-        </div>
-
-        <div class="results-actions">
+        <div class="report-window-actions">
           <button id="copyReportBtn" class="secondary-btn" type="button">리포트 복사</button>
+          <button id="downloadReportBtn" class="secondary-btn" type="button">리포트 다운로드</button>
+          <button id="closeReportBtn" class="secondary-btn" type="button">닫기</button>
         </div>
       </div>
 
-      <div class="vector-grid" id="axisScores"></div>
-
-      <div class="summary-panel">
-        <h3>결과 요약</h3>
-        <p id="summaryText"></p>
-      </div>
-
-      <div class="results-card warning-card">
-        <h3>주의 행동 특성</h3>
-        <ul id="behavioralWarnings" class="bullet-list"></ul>
-      </div>
-
-      <div class="results-columns">
-        <div class="results-card">
-          <h3>파싱 요약</h3>
-          <ul id="parseSummary" class="bullet-list"></ul>
-        </div>
-        <div class="results-card">
-          <h3>질문 세트 메타데이터</h3>
-          <ul id="metadataSummary" class="bullet-list"></ul>
-        </div>
-      </div>
-
-      <div class="results-card">
-        <div class="insight-toolbar">
-          <h3>질문별 분석 인사이트</h3>
-          <div class="insight-controls">
-            <select id="insightSort">
-              <option value="question-order">질문 순서</option>
-              <option value="highest-score">점수 높은 순</option>
-              <option value="lowest-score">점수 낮은 순</option>
-            </select>
-            <button id="insightToggle" class="secondary-btn" type="button">전체 보기</button>
+      <div class="report-window-body">
+        <section class="report-panel">
+          <div class="section-header">
+            <h3>AI Behavior Report</h3>
+            <span class="section-kicker" id="completenessLabel"></span>
           </div>
+          <div class="prescription-meta report-meta-grid" id="reportMeta"></div>
+          <div class="hero-summary">
+            <p id="summaryText"></p>
+          </div>
+        </section>
+
+        <section class="report-panel">
+          <div class="section-header">
+            <h3>Diagnostic Summary</h3>
+            <span class="section-kicker">Strengths vs Weaknesses</span>
+          </div>
+          <p id="diagnosticNotes"></p>
+          <div class="strength-weakness-grid">
+            <div class="results-card strength-card">
+              <h4>Strengths</h4>
+              <div id="strongAxes" class="summary-chip-list"></div>
+            </div>
+            <div class="results-card weakness-card">
+              <h4>Weaknesses</h4>
+              <div id="weakAxes" class="summary-chip-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="report-panel">
+          <div class="section-header">
+            <h3>Vector Scores</h3>
+            <span class="section-kicker">9 Axes</span>
+          </div>
+          <div class="vector-grid" id="axisScores"></div>
+        </section>
+
+        <section class="report-panel">
+          <div class="section-header">
+            <h3>Axis Score Table</h3>
+            <span class="section-kicker">Interpretation</span>
+          </div>
+          <div class="axis-table-wrap">
+            <table class="axis-table">
+              <thead>
+                <tr>
+                  <th>Axis</th>
+                  <th>Score</th>
+                  <th>Interpretation</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="axisTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="results-columns report-columns">
+          <section class="report-panel">
+            <div class="section-header">
+              <h3>Recommended Usage</h3>
+              <span class="section-kicker">Prompt Strategy</span>
+            </div>
+            <ul id="recommendedUsage" class="bullet-list"></ul>
+          </section>
+
+          <section class="report-panel">
+            <div class="section-header">
+              <h3>Behavioral Warnings</h3>
+              <span class="section-kicker">Watchouts</span>
+            </div>
+            <ul id="behavioralWarnings" class="bullet-list"></ul>
+          </section>
         </div>
-        <div id="questionAnalysisList" class="question-analysis-list"></div>
+
+        <div class="results-columns">
+          <section class="report-panel">
+            <div class="section-header">
+              <h3>파싱 요약</h3>
+              <span class="section-kicker">Parsing Summary</span>
+            </div>
+            <ul id="parseSummary" class="bullet-list"></ul>
+          </section>
+
+          <section class="report-panel">
+            <div class="section-header">
+              <h3>질문 세트 메타데이터</h3>
+              <span class="section-kicker">Metadata</span>
+            </div>
+            <ul id="metadataSummary" class="bullet-list"></ul>
+          </section>
+        </div>
+
+        <section class="report-panel">
+          <div class="insight-toolbar">
+            <div>
+              <h3>Question Insights</h3>
+              <p class="toolbar-copy">질문별 전략 태그와 점수를 빠르게 훑어볼 수 있습니다.</p>
+            </div>
+            <div class="insight-controls">
+              <select id="insightSort">
+                <option value="question-order">질문 순서</option>
+                <option value="highest-score">점수 높은 순</option>
+                <option value="lowest-score">점수 낮은 순</option>
+              </select>
+              <button id="insightToggle" class="secondary-btn" type="button">전체 보기</button>
+            </div>
+          </div>
+          <div id="questionAnalysisList" class="question-analysis-list"></div>
+        </section>
       </div>
     </section>
   </div>

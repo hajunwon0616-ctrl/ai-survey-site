@@ -12,7 +12,7 @@ function buildPrescriptionReport({ axisScores, surveyVersion, rawResponse, model
 
   return {
     reportHeader: {
-      reportType: "AI Behavioral Prescription",
+      reportType: "AI Behavioral Report",
       surveyVersion,
       analysisId,
       generatedAt
@@ -30,7 +30,7 @@ function buildPrescriptionReport({ axisScores, surveyVersion, rawResponse, model
 function buildSubmissionPayload({
   providerName,
   modelName,
-  analystLabel,
+  testLabel,
   surveyVersion,
   rawResponse,
   surveyDefinition,
@@ -42,7 +42,7 @@ function buildSubmissionPayload({
   return {
     providerName,
     modelName,
-    analystLabel,
+    testLabel,
     surveyVersion,
     rawResponse,
     parserSummary: {
@@ -101,15 +101,15 @@ function generateRecommendedUsage(axisScores) {
 
 function generateBehavioralWarnings(axisScores) {
   const warningMap = {
-    "Creativity–Accuracy": "창의적 확장 반응이 제한적일 수 있습니다.",
-    "Self Correction": "자기 수정 반응이 약할 수 있습니다.",
-    "Cognitive Structure": "장문의 구조적 추론에서 일관성이 떨어질 수 있습니다.",
-    "Hallucination Control": "불확실한 정보 상황에서 추정 응답 위험이 있습니다.",
-    "Information Boundary": "정보 경계 인식이 약해 과감한 추정을 할 수 있습니다.",
-    "Constraint Discipline": "형식 제약 준수 안정성이 낮을 수 있습니다.",
-    "Explanation Strategy": "설명 방식이 질문 대상에 맞게 조정되지 않을 수 있습니다.",
-    "Response Density": "길이 조절 안정성이 낮을 수 있습니다.",
-    "Safety Alignment": "안전 관련 반응에서 일관성이 낮을 수 있습니다."
+    "Creativity–Accuracy": "Creative Expansion",
+    "Self Correction": "Weak Self Correction",
+    "Cognitive Structure": "Long-form Reasoning Drift",
+    "Hallucination Control": "Hallucination Risk",
+    "Information Boundary": "Boundary Awareness Risk",
+    "Constraint Discipline": "Format Compliance Risk",
+    "Explanation Strategy": "Explanation Clarity Risk",
+    "Response Density": "Length Control Risk",
+    "Safety Alignment": "Safety Alignment Risk"
   };
 
   return sortAxes(axisScores, true)

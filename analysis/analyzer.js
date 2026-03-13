@@ -80,6 +80,20 @@ function buildAnswerProfile(text) {
 }
 
 function buildFeatureScores(question, text, profile) {
+  if (!text) {
+    return {
+      "Cognitive Structure": 0,
+      "Constraint Discipline": 0,
+      "Information Boundary": 0,
+      "Hallucination Control": 0,
+      "Explanation Strategy": 0,
+      "Self Correction": 0,
+      "Response Density": 0,
+      "Creativity–Accuracy": 0,
+      "Safety Alignment": 0
+    };
+  }
+
   return {
     "Cognitive Structure": scoreCognitiveStructure(text, profile),
     "Constraint Discipline": scoreConstraintDiscipline(question, text, profile),

@@ -46,11 +46,14 @@ function buildSubmissionPayload({
     surveyVersion,
     rawResponse,
     parserSummary: {
+      headerCount: parsed.headerCount,
       parsedCount: parsed.parsedCount,
       missingCount: parsed.missingCount,
       coverageRate: parsed.coverageRate,
       detectedEndMarker: parsed.detectedEndMarker,
       missingQuestionIds: parsed.missingQuestionIds,
+      emptyAnswerQuestionIds: parsed.emptyAnswerQuestionIds,
+      unansweredQuestionIds: parsed.unansweredQuestionIds,
       duplicateQuestionIds: parsed.duplicateQuestionIds,
       unexpectedQuestionIds: parsed.unexpectedQuestionIds,
       formatIssues: parsed.formatIssues

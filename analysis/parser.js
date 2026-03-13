@@ -16,6 +16,7 @@ function parseSurveyResponse(rawResponse, surveyDefinition) {
   const answers = [];
   const answersByQuestion = {};
   const duplicateQuestionIds = [];
+  const emptyAnswerQuestionIds = [];
 
   for (let index = 0; index < matches.length; index += 1) {
     const match = matches[index];
@@ -24,6 +25,10 @@ function parseSurveyResponse(rawResponse, surveyDefinition) {
     const answerStart = match.index + currentHeader.length;
     const answerEnd = index + 1 < matches.length ? matches[index + 1].index : truncated.length;
     const answerText = truncated.slice(answerStart, answerEnd).trim();
+
+    if (!answerText) {
+      emptyAnswerQuestionIds.push(questionId);
+    }
 
     if (Object.prototype.hasOwnProperty.call(answersByQuestion, questionId)) {
       duplicateQuestionIds.push(questionId);
@@ -40,6 +45,10 @@ function parseSurveyResponse(rawResponse, surveyDefinition) {
   const expectedIds = surveyDefinition.questions.map((question) => question.questionId);
   const parsedIds = answers.map((answer) => answer.questionId);
   const missingQuestionIds = expectedIds.filter((id) => !parsedIds.includes(id));
+  const unansweredQuestionIds = [...new Set([
+    ...missingQuestionIds,
+    ...emptyAnswerQuestionIds
+  ])];
   const unexpectedQuestionIds = parsedIds.filter((id) => !expectedIds.includes(id));
   const formatIssues = [];
 
@@ -55,19 +64,28 @@ function parseSurveyResponse(rawResponse, surveyDefinition) {
     formatIssues.push(`중복 질문: ${[...new Set(duplicateQuestionIds)].join(", ")}`);
   }
 
+  if (emptyAnswerQuestionIds.length) {
+    formatIssues.push(`빈 답변 질문: ${[...new Set(emptyAnswerQuestionIds)].join(", ")}`);
+  }
+
   if (unexpectedQuestionIds.length) {
     formatIssues.push(`예상 외 질문 ID: ${unexpectedQuestionIds.join(", ")}`);
   }
+
+  const answeredCount = answers.filter((answer) => answer.answerText).length;
 
   return {
     answers,
     answersByQuestion,
     rawLength: rawResponse.length,
-    parsedCount: answers.length,
-    missingCount: missingQuestionIds.length,
-    coverageRate: round((answers.length / expectedIds.length) * 100),
+    headerCount: answers.length,
+    parsedCount: answeredCount,
+    missingCount: unansweredQuestionIds.length,
+    coverageRate: round((answeredCount / expectedIds.length) * 100),
     detectedEndMarker: endIndex >= 0,
     missingQuestionIds,
+    emptyAnswerQuestionIds: [...new Set(emptyAnswerQuestionIds)],
+    unansweredQuestionIds,
     duplicateQuestionIds: [...new Set(duplicateQuestionIds)],
     unexpectedQuestionIds,
     formatIssues

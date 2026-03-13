@@ -102,6 +102,7 @@ const UI_TEXT = {
     model: "Model",
     noWeakness: "뚜렷한 취약 축이 감지되지 않았습니다.",
     parsedCount: "파싱된 질문 수",
+    headerCount: "인식된 질문 헤더 수",
     missingCount: "누락된 질문 수",
     coverageRate: "응답 커버리지",
     duplicateCount: "중복 질문 수",
@@ -138,6 +139,7 @@ const UI_TEXT = {
     model: "Model",
     noWeakness: "No major weakness axes were detected.",
     parsedCount: "Parsed Questions",
+    headerCount: "Detected Headers",
     missingCount: "Missing Questions",
     coverageRate: "Coverage",
     duplicateCount: "Duplicate Questions",
@@ -236,6 +238,7 @@ function renderResults(elements, payload, overrides = {}) {
       : [text.noWeakness]
   );
   renderList(elements.parseSummary, [
+    `${text.headerCount}: ${payload.parserSummary.headerCount ?? payload.parserSummary.parsedCount}`,
     `${text.parsedCount}: ${payload.parserSummary.parsedCount}`,
     `${text.missingCount}: ${payload.parserSummary.missingCount}`,
     `${text.coverageRate}: ${payload.parserSummary.coverageRate}%`,

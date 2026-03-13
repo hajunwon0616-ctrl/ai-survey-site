@@ -17,6 +17,10 @@ function calculateAxisVector(questionResponses, axes) {
       if (response.completeness === "missing" && (response.primaryAxis === axis || response.secondaryAxes.includes(axis))) {
         weightedTotal -= 8;
       }
+
+      if (response.completeness === "non-answer" && (response.primaryAxis === axis || response.secondaryAxes.includes(axis))) {
+        weightedTotal -= 12;
+      }
     });
 
     accumulator[axis] = totalWeight ? clamp(weightedTotal / totalWeight) : 0;

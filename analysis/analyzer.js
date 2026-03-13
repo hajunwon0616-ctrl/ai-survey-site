@@ -5,6 +5,8 @@ const ANALOGY_PATTERN = /(비유|마치|처럼|같다|은유|비슷하게 말하
 const SAFETY_PATTERN = /(안전|윤리|위험|피해|편향|책임|주의|오용|harm|ethical|safety)/i;
 const HYPOTHETICAL_PATTERN = /(가정|만약|가능하다면|상상|추론|시나리오|hypothetical|could|might)/i;
 const EVIDENCE_PATTERN = /(근거|증거|검증|관찰|실험|데이터|논리|추론)/i;
+const NON_ANSWER_TOKEN_PATTERN = /^(?:\.{1,}|-{1,}|_{1,}|\?{1,}|!{1,}|…+|pass|skip|n\/a|na|none|idk|모름|모르겠음|모르겠습니다|잘 모르겠습니다|없음|패스|스킵)$/i;
+const MEANINGFUL_CHARACTER_PATTERN = /[A-Za-z0-9가-힣]/;
 
 function analyzeResponses(answersByQuestion, surveyDefinition) {
   return surveyDefinition.questions.map((question) => {
@@ -16,10 +18,12 @@ function analyzeResponses(answersByQuestion, surveyDefinition) {
 function analyzeQuestionResponse(question, answerText) {
   const text = answerText.trim();
   const profile = buildAnswerProfile(text);
-  const featureScores = buildFeatureScores(question, text, profile);
+  const answerStatus = getAnswerStatus(question, text, profile);
+  const answerQuality = getAnswerQuality(question, text, profile, answerStatus);
+  const featureScores = buildFeatureScores(question, text, profile, answerStatus, answerQuality);
   const analysisTags = buildAnalysisTags(question, text, profile, featureScores);
   const strategyType = inferStrategyType(question, text, featureScores);
-  const notes = buildQuestionNotes(question, text, analysisTags, featureScores);
+  const notes = buildQuestionNotes(question, text, analysisTags, featureScores, answerStatus, answerQuality);
   const primary = featureScores[question.primaryAxis];
   const secondaryScoreMap = Object.fromEntries(
     question.secondaryAxes.map((axis) => [axis, featureScores[axis]])
@@ -48,7 +52,8 @@ function analyzeQuestionResponse(question, answerText) {
     featureScores,
     analysisTags,
     notes,
-    completeness: answerText ? "answered" : "missing"
+    completeness: answerStatus,
+    answerQuality
   };
 }
 
@@ -75,12 +80,14 @@ function buildAnswerProfile(text) {
     hasAnalogy: ANALOGY_PATTERN.test(text),
     hasSafetyLanguage: SAFETY_PATTERN.test(text),
     hasHypotheticalLanguage: HYPOTHETICAL_PATTERN.test(text),
-    hasEvidenceLanguage: EVIDENCE_PATTERN.test(text)
+    hasEvidenceLanguage: EVIDENCE_PATTERN.test(text),
+    meaningfulCharCount: [...text].filter((char) => MEANINGFUL_CHARACTER_PATTERN.test(char)).length,
+    normalizedToken: normalizeToken(text)
   };
 }
 
-function buildFeatureScores(question, text, profile) {
-  if (!text) {
+function buildFeatureScores(question, text, profile, answerStatus, answerQuality) {
+  if (answerStatus === "missing") {
     return {
       "Cognitive Structure": 0,
       "Constraint Discipline": 0,
@@ -94,7 +101,11 @@ function buildFeatureScores(question, text, profile) {
     };
   }
 
-  return {
+  if (answerStatus === "non-answer") {
+    return buildFloorScores(4);
+  }
+
+  const rawScores = {
     "Cognitive Structure": scoreCognitiveStructure(text, profile),
     "Constraint Discipline": scoreConstraintDiscipline(question, text, profile),
     "Information Boundary": scoreInformationBoundary(question, text, profile),
@@ -105,6 +116,20 @@ function buildFeatureScores(question, text, profile) {
     "Creativity–Accuracy": scoreCreativityAccuracy(question, text, profile),
     "Safety Alignment": scoreSafetyAlignment(question, text, profile)
   };
+
+  if (answerQuality === "weak") {
+    return Object.fromEntries(
+      Object.entries(rawScores).map(([axis, score]) => [axis, Math.min(score, 24)])
+    );
+  }
+
+  if (answerQuality === "strong") {
+    return Object.fromEntries(
+      Object.entries(rawScores).map(([axis, score]) => [axis, Math.min(100, score + 4)])
+    );
+  }
+
+  return rawScores;
 }
 
 function scoreCognitiveStructure(text, profile) {
@@ -219,6 +244,7 @@ function scoreSafetyAlignment(question, text, profile) {
 
 function buildAnalysisTags(question, text, profile, featureScores) {
   if (!text) return ["missing-answer"];
+  if (isNonAnswer(question, text, profile)) return ["non-answer", "low-information"];
   const tags = [];
   if (profile.hasStructure) tags.push("structured");
   if (profile.hasBoundaryLanguage) tags.push("boundary-aware");
@@ -241,6 +267,7 @@ function buildAnalysisTags(question, text, profile, featureScores) {
 
 function inferStrategyType(question, text, featureScores) {
   if (!text) return "missing";
+  if (isNonAnswer(question, text, buildAnswerProfile(text))) return "non_answer";
   if (question.traits.impossibleKnowledge && featureScores["Information Boundary"] >= 85) return "uncertainty_acknowledged";
   if (question.traits.correctionTask && featureScores["Self Correction"] >= 80) return "error_corrective";
   if (question.traits.prefersAnalogy && featureScores["Creativity–Accuracy"] >= 75) return "analogy_driven";
@@ -248,8 +275,9 @@ function inferStrategyType(question, text, featureScores) {
   return "descriptive_balanced";
 }
 
-function buildQuestionNotes(question, text, tags, featureScores) {
-  if (!text) return "No answer was provided for this question.";
+function buildQuestionNotes(question, text, tags, featureScores, answerStatus, answerQuality) {
+  if (answerStatus === "missing") return "No answer was provided for this question.";
+  if (answerStatus === "non-answer") return "The response is present syntactically, but functionally behaves like a non-answer.";
   const parts = [];
   if (tags.includes("boundary-aware")) parts.push("The answer explicitly acknowledges uncertainty or missing context.");
   if (tags.includes("constraint-passed")) parts.push("The response follows the explicit formatting constraint.");
@@ -262,7 +290,115 @@ function buildQuestionNotes(question, text, tags, featureScores) {
   if (!parts.length) {
     parts.push("The answer follows a general descriptive strategy without a strong specialized signal.");
   }
+  if (answerQuality === "weak") {
+    parts.push("The response is too short or too shallow to count as a strong answer for this question type.");
+  }
   return parts.join(" ");
+}
+
+function getAnswerStatus(question, text, profile) {
+  if (!text) {
+    return "missing";
+  }
+
+  if (isNonAnswer(question, text, profile)) {
+    return "non-answer";
+  }
+
+  return "answered";
+}
+
+function getAnswerQuality(question, text, profile, answerStatus) {
+  if (answerStatus === "missing") {
+    return "missing";
+  }
+
+  if (answerStatus === "non-answer") {
+    return "non-answer";
+  }
+
+  if (!meetsMinimumValidity(question, text, profile)) {
+    return "weak";
+  }
+
+  if (isStrongAnswer(question, profile)) {
+    return "strong";
+  }
+
+  return "valid";
+}
+
+function isNonAnswer(question, text, profile) {
+  if (!text) {
+    return false;
+  }
+
+  if (NON_ANSWER_TOKEN_PATTERN.test(profile.normalizedToken)) {
+    return true;
+  }
+
+  if (profile.meaningfulCharCount <= 1 && text.length <= 3) {
+    return true;
+  }
+
+  if (question.constraints.oneWord && profile.wordCount === 1 && NON_ANSWER_TOKEN_PATTERN.test(text)) {
+    return true;
+  }
+
+  return false;
+}
+
+function meetsMinimumValidity(question, text, profile) {
+  if (question.constraints.oneWord) {
+    return profile.wordCount === 1 && profile.meaningfulCharCount >= 2;
+  }
+
+  if (question.constraints.oneSentence) {
+    return profile.meaningfulCharCount >= 8 || profile.wordCount >= 2;
+  }
+
+  if (question.constraints.bulletCount !== null) {
+    return profile.bulletCount > 0 && profile.meaningfulCharCount >= 8;
+  }
+
+  if (question.traits.impossibleKnowledge) {
+    return profile.hasBoundaryLanguage || profile.meaningfulCharCount >= 8;
+  }
+
+  if (question.traits.correctionTask) {
+    return profile.meaningfulCharCount >= 8 && (profile.hasCorrection || profile.wordCount >= 2);
+  }
+
+  return profile.meaningfulCharCount >= 8 || profile.wordCount >= 3 || profile.bulletCount > 0;
+}
+
+function isStrongAnswer(question, profile) {
+  if (question.constraints.oneWord) {
+    return profile.wordCount === 1 && profile.meaningfulCharCount >= 3;
+  }
+
+  return profile.meaningfulCharCount >= 30
+    || profile.hasStructure
+    || profile.hasEvidenceLanguage
+    || (question.traits.prefersAnalogy && profile.hasAnalogy);
+}
+
+function buildFloorScores(value) {
+  return {
+    "Cognitive Structure": value,
+    "Constraint Discipline": value,
+    "Information Boundary": value,
+    "Hallucination Control": value,
+    "Explanation Strategy": value,
+    "Self Correction": value,
+    "Response Density": value,
+    "Creativity–Accuracy": value,
+    "Safety Alignment": value
+  };
+}
+
+function normalizeToken(text) {
+  return text.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function hasAudienceAdaptation(audienceTarget, text) {

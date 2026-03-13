@@ -122,6 +122,7 @@ const UI_TEXT = {
     overall: "Overall",
     noAnswer: "응답 없음",
     noAnswerNote: "이 질문에 대한 응답이 제출되지 않았습니다.",
+    answerQuality: "응답 품질",
     strongest: "Strongest",
     weakest: "Weakest",
     strength: "강점",
@@ -164,6 +165,7 @@ const UI_TEXT = {
     overall: "Overall",
     noAnswer: "No answer",
     noAnswerNote: "No response was submitted for this question.",
+    answerQuality: "Answer quality",
     strongest: "Strongest",
     weakest: "Weakest",
     strength: "Strength",
@@ -384,6 +386,7 @@ function renderQuestionInsights(elements, questionResponses, uiState) {
         <span class="pill">${text.primary} ${response.primaryAxis}: ${response.score.primary}</span>
         <span class="pill">${text.secondary}: ${response.score.secondary}</span>
         <span class="pill">${text.overall}: ${response.score.overall}</span>
+        <span class="pill">${text.answerQuality}: ${response.answerQuality}</span>
       </div>
       <div class="analysis-tags">
         ${response.analysisTags.map((tag) => `<span class="pill">${tag}</span>`).join("")}

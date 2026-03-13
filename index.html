@@ -146,6 +146,55 @@
       </div>
     </section>
 
+    <section class="panel section" id="autonomyLabSection">
+      <div class="section-header">
+        <h2 id="autonomyTitle">Autonomy Lab</h2>
+        <span id="autonomyKicker" class="section-kicker">Curator / Auditor / Simulator / Deployer</span>
+      </div>
+      <p id="autonomyDescription" class="sub">
+        기존 응답 데이터를 기반으로 자율 개선 사이클을 실행하고,
+        candidate proposal, evaluation run, trend report 상태를 확인합니다.
+      </p>
+
+      <div class="form-actions">
+        <button type="button" id="runAutonomyBtn" class="primary-btn">자율 운영 사이클 실행</button>
+        <button type="button" id="refreshAutonomyBtn" class="secondary-btn">상태 새로고침</button>
+      </div>
+      <div class="status" id="autonomyStatus" role="status" aria-live="polite"></div>
+
+      <div class="autonomy-grid">
+        <section class="results-card autonomy-card">
+          <h3 id="autonomyActiveConfigTitle">Active Config</h3>
+          <div id="autonomyActiveConfig" class="autonomy-kv"></div>
+        </section>
+
+        <section class="results-card autonomy-card">
+          <h3 id="autonomyEvaluationsTitle">Recent Evaluations</h3>
+          <ul id="autonomyEvaluations" class="bullet-list"></ul>
+        </section>
+
+        <section class="results-card autonomy-card">
+          <h3 id="autonomyQuestionProposalsTitle">Question Proposals</h3>
+          <ul id="autonomyQuestionProposals" class="bullet-list"></ul>
+        </section>
+
+        <section class="results-card autonomy-card">
+          <h3 id="autonomyScoringProposalsTitle">Scoring Proposals</h3>
+          <ul id="autonomyScoringProposals" class="bullet-list"></ul>
+        </section>
+
+        <section class="results-card autonomy-card">
+          <h3 id="autonomyTrendsTitle">Trend Reports</h3>
+          <ul id="autonomyTrends" class="bullet-list"></ul>
+        </section>
+
+        <section class="results-card autonomy-card">
+          <h3 id="autonomyLogsTitle">Agent Logs</h3>
+          <ul id="autonomyLogs" class="bullet-list"></ul>
+        </section>
+      </div>
+    </section>
+
   </div>
 
   <div class="loading-overlay" id="loadingOverlay" hidden>

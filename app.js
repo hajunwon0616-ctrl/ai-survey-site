@@ -23,6 +23,14 @@ import {
   showStatusMessage,
   bindResultActions
 } from "./analysis/renderer.js";
+import {
+  loadAutonomySnapshot,
+  runAutonomyCycle
+} from "./autonomy/autonomy-runner.js";
+import {
+  renderAutonomySnapshot,
+  renderAutonomyStatus
+} from "./autonomy/ui.js";
 
 const surveyDefinition = getSurveyDefinition();
 const surveyVersion = getSurveyVersion();
@@ -68,7 +76,16 @@ const elements = {
   insightExpandBtn: document.getElementById("insightExpandBtn"),
   copyReportBtn: document.getElementById("copyReportBtn"),
   downloadReportBtn: document.getElementById("downloadReportBtn"),
-  exportPdfBtn: document.getElementById("exportPdfBtn")
+  exportPdfBtn: document.getElementById("exportPdfBtn"),
+  runAutonomyBtn: document.getElementById("runAutonomyBtn"),
+  refreshAutonomyBtn: document.getElementById("refreshAutonomyBtn"),
+  autonomyStatus: document.getElementById("autonomyStatus"),
+  autonomyActiveConfig: document.getElementById("autonomyActiveConfig"),
+  autonomyEvaluations: document.getElementById("autonomyEvaluations"),
+  autonomyQuestionProposals: document.getElementById("autonomyQuestionProposals"),
+  autonomyScoringProposals: document.getElementById("autonomyScoringProposals"),
+  autonomyTrends: document.getElementById("autonomyTrends"),
+  autonomyLogs: document.getElementById("autonomyLogs")
 };
 
 const PROVIDER_MODELS = {
@@ -158,6 +175,22 @@ const UI_COPY = {
     viewResultsBtn: "결과 보기",
     insightExpandBtn: "전체 펼치기",
     insightCollapseBtn: "접기",
+    autonomyTitle: "Autonomy Lab",
+    autonomyKicker: "Curator / Auditor / Simulator / Deployer",
+    autonomyDescription: "기존 응답 데이터를 기반으로 자율 개선 사이클을 실행하고, candidate proposal, evaluation run, trend report 상태를 확인합니다.",
+    runAutonomyBtn: "자율 운영 사이클 실행",
+    refreshAutonomyBtn: "상태 새로고침",
+    autonomyActiveConfigTitle: "Active Config",
+    autonomyEvaluationsTitle: "Recent Evaluations",
+    autonomyQuestionProposalsTitle: "Question Proposals",
+    autonomyScoringProposalsTitle: "Scoring Proposals",
+    autonomyTrendsTitle: "Trend Reports",
+    autonomyLogsTitle: "Agent Logs",
+    autonomyStatusReady: "자율 운영 상태를 불러왔습니다.",
+    autonomyStatusRunning: "자율 운영 사이클을 실행 중입니다...",
+    autonomyStatusCompleted: "자율 운영 사이클이 완료되었습니다.",
+    autonomyStatusNoData: "분석할 응답 데이터가 아직 없습니다.",
+    autonomyStatusFailed: "자율 운영 사이클 실행 중 오류가 발생했습니다.",
     loadingParsing: "질문별 응답을 파싱하는 중",
     loadingAnalyzing: "질문별 행동 특성을 분석하는 중",
     loadingScoring: "행동 벡터를 계산하는 중",
@@ -245,6 +278,22 @@ const UI_COPY = {
     viewResultsBtn: "View Results",
     insightExpandBtn: "Expand all",
     insightCollapseBtn: "Collapse",
+    autonomyTitle: "Autonomy Lab",
+    autonomyKicker: "Curator / Auditor / Simulator / Deployer",
+    autonomyDescription: "Run the autonomous improvement cycle on accumulated responses and inspect candidate proposals, evaluation runs, and trend reports.",
+    runAutonomyBtn: "Run autonomy cycle",
+    refreshAutonomyBtn: "Refresh status",
+    autonomyActiveConfigTitle: "Active Config",
+    autonomyEvaluationsTitle: "Recent Evaluations",
+    autonomyQuestionProposalsTitle: "Question Proposals",
+    autonomyScoringProposalsTitle: "Scoring Proposals",
+    autonomyTrendsTitle: "Trend Reports",
+    autonomyLogsTitle: "Agent Logs",
+    autonomyStatusReady: "Loaded the autonomy lab state.",
+    autonomyStatusRunning: "Running the autonomy cycle...",
+    autonomyStatusCompleted: "Autonomy cycle completed.",
+    autonomyStatusNoData: "There are no stored responses to analyze yet.",
+    autonomyStatusFailed: "The autonomy cycle failed.",
     loadingParsing: "Parsing question-by-question responses",
     loadingAnalyzing: "Analyzing behavioral traits by question",
     loadingScoring: "Calculating the behavioral vector",
@@ -257,6 +306,7 @@ const UI_COPY = {
 };
 
 let latestRenderedPayload = null;
+let autonomyInitialized = false;
 
 initializePage(elements, surveyVersion, currentLocale);
 applyLocale(currentLocale);
@@ -317,6 +367,7 @@ bindResultActions(elements, {
 
 initializeProviderModelControls(elements);
 initializeLanguageControls(elements);
+initializeAutonomyLab();
 
 elements.startBtn.addEventListener("click", () => {
   elements.surveySection.scrollIntoView({ behavior: "smooth" });
@@ -618,6 +669,27 @@ function applyLocale(locale) {
   updateInsightExpansionLabel(locale);
   elements.langKoBtn?.classList.toggle("is-active", locale === "ko");
   elements.langEnBtn?.classList.toggle("is-active", locale === "en");
+  const autonomyTextTargets = {
+    autonomyTitle: copy.autonomyTitle,
+    autonomyKicker: copy.autonomyKicker,
+    autonomyDescription: copy.autonomyDescription,
+    runAutonomyBtn: copy.runAutonomyBtn,
+    refreshAutonomyBtn: copy.refreshAutonomyBtn,
+    autonomyActiveConfigTitle: copy.autonomyActiveConfigTitle,
+    autonomyEvaluationsTitle: copy.autonomyEvaluationsTitle,
+    autonomyQuestionProposalsTitle: copy.autonomyQuestionProposalsTitle,
+    autonomyScoringProposalsTitle: copy.autonomyScoringProposalsTitle,
+    autonomyTrendsTitle: copy.autonomyTrendsTitle,
+    autonomyLogsTitle: copy.autonomyLogsTitle
+  };
+
+  Object.entries(autonomyTextTargets).forEach(([id, value]) => {
+    const node = document.getElementById(id);
+    if (node) {
+      node.textContent = value;
+    }
+  });
+
   if (elements.viewResultsBtn && !elements.viewResultsBtn.hidden) {
     elements.viewResultsBtn.textContent = copy.viewResultsBtn;
   }
@@ -686,5 +758,90 @@ function updateResultsButtonState(hasResults) {
   elements.viewResultsBtn.disabled = !hasResults;
   if (hasResults) {
     elements.viewResultsBtn.textContent = UI_COPY[currentLocale].viewResultsBtn;
+  }
+}
+
+function initializeAutonomyLab() {
+  if (autonomyInitialized || !elements.runAutonomyBtn || !elements.refreshAutonomyBtn) {
+    return;
+  }
+
+  autonomyInitialized = true;
+
+  elements.runAutonomyBtn.addEventListener("click", async () => {
+    await executeAutonomyCycle();
+  });
+
+  elements.refreshAutonomyBtn.addEventListener("click", async () => {
+    await refreshAutonomyLab();
+  });
+
+  refreshAutonomyLab();
+}
+
+async function refreshAutonomyLab() {
+  if (!elements.autonomyStatus) {
+    return;
+  }
+
+  setAutonomyBusy(true);
+  renderAutonomyStatus(elements.autonomyStatus, UI_COPY[currentLocale].autonomyStatusReady);
+
+  try {
+    const snapshot = await loadAutonomySnapshot({ db });
+    renderAutonomySnapshot(elements, snapshot);
+  } catch (error) {
+    console.error("Autonomy snapshot error:", error);
+    renderAutonomyStatus(
+      elements.autonomyStatus,
+      `${UI_COPY[currentLocale].autonomyStatusFailed} ${error.message}`,
+      true
+    );
+  } finally {
+    setAutonomyBusy(false);
+  }
+}
+
+async function executeAutonomyCycle() {
+  if (!elements.autonomyStatus) {
+    return;
+  }
+
+  setAutonomyBusy(true);
+  renderAutonomyStatus(elements.autonomyStatus, UI_COPY[currentLocale].autonomyStatusRunning);
+
+  try {
+    const result = await runAutonomyCycle({
+      db,
+      surveyDefinition,
+      surveyVersion
+    });
+
+    renderAutonomySnapshot(elements, result.snapshot);
+
+    if (!result.ok && result.reason === "no-submissions") {
+      renderAutonomyStatus(elements.autonomyStatus, UI_COPY[currentLocale].autonomyStatusNoData, true);
+      return;
+    }
+
+    renderAutonomyStatus(elements.autonomyStatus, UI_COPY[currentLocale].autonomyStatusCompleted);
+  } catch (error) {
+    console.error("Autonomy cycle error:", error);
+    renderAutonomyStatus(
+      elements.autonomyStatus,
+      `${UI_COPY[currentLocale].autonomyStatusFailed} ${error.message}`,
+      true
+    );
+  } finally {
+    setAutonomyBusy(false);
+  }
+}
+
+function setAutonomyBusy(isBusy) {
+  if (elements.runAutonomyBtn) {
+    elements.runAutonomyBtn.disabled = isBusy;
+  }
+  if (elements.refreshAutonomyBtn) {
+    elements.refreshAutonomyBtn.disabled = isBusy;
   }
 }

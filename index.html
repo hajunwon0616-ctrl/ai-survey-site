@@ -3,111 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 행동 성향 설문</title>
+  <title>AI 행동 성향 분석 시스템</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <section class="hero">
       <div class="panel hero-main">
-        <div class="badge">
-          AI 행동 성향 설문 플랫폼
-        </div>
-        <h1>
-          AI 행동 성향 설문
-        </h1>
+        <div class="badge">Behavioral Profile Analysis</div>
+        <h1>AI 행동 성향 분석 시스템</h1>
         <p>
-          버튼을 누르면 설문을 시작할 수 있습니다.
+          질문을 직접 답하는 설문이 아니라, AI가 작성한 전체 응답을 붙여넣어
+          행동 벡터를 분석하는 도구입니다.
         </p>
         <div class="actions">
-          <button id="startBtn" class="primary-btn">
-            설문 시작하기
-          </button>
+          <button id="startBtn" class="primary-btn" type="button">분석 시작하기</button>
+          <button id="downloadBtn" class="secondary-btn" type="button">질문지 다운로드</button>
         </div>
       </div>
     </section>
+
+    <section class="panel process-panel">
+      <div class="section-header">
+        <h2>사용자 흐름</h2>
+        <span class="section-kicker">Download -> Prompt -> Paste -> Analyze</span>
+      </div>
+      <div class="process-grid">
+        <div class="process-card">
+          <strong>1. 질문지 다운로드</strong>
+          <p>버전이 포함된 질문 세트를 내려받아 AI에 그대로 입력합니다.</p>
+        </div>
+        <div class="process-card">
+          <strong>2. AI 응답 수집</strong>
+          <p>AI가 작성한 전체 답변을 형식 그대로 복사합니다.</p>
+        </div>
+        <div class="process-card">
+          <strong>3. 응답 붙여넣기</strong>
+          <p>제출 화면에 전체 텍스트를 넣고 분석을 실행합니다.</p>
+        </div>
+        <div class="process-card">
+          <strong>4. 행동 벡터 생성</strong>
+          <p>파싱, 축별 분석, 요약 생성 후 Firestore에 저장합니다.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="panel section" id="surveySection">
-      <h2>설문 응답</h2>
+      <div class="section-header">
+        <h2>AI 응답 제출</h2>
+        <span class="section-kicker" id="surveyVersionLabel"></span>
+      </div>
       <p class="sub">
-        아래 질문에 답한 후 제출하세요.
+        AI의 전체 응답 텍스트를 붙여넣으세요. 형식은 <code>Q1:</code> 부터
+        <code>Q60:</code>, 그리고 마지막의 <code>[END OF SURVEY]</code>를 포함해야 합니다.
       </p>
+
       <div class="form-wrap">
-        <form id="surveyForm">
-          <div class="question">
-            <label>
-              Q1. 새로운 문제를 만나면 먼저 구조를 나누어 생각하는 편인가요?
-            </label>
-            <div class="options">
-              <label class="option">
-                <input type="radio" name="q1" value="1" required>
-                전혀 아니다
-              </label>
-              <label class="option">
-                <input type="radio" name="q1" value="2">
-                아니다
-              </label>
-              <label class="option">
-                <input type="radio" name="q1" value="3">
-                보통이다
-              </label>
-              <label class="option">
-                <input type="radio" name="q1" value="4">
-                그렇다
-              </label>
-              <label class="option">
-                <input type="radio" name="q1" value="5">
-                매우 그렇다
-              </label>
+        <form id="analysisForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="providerName">AI 서비스명</label>
+              <input id="providerName" name="providerName" type="text" placeholder="예: ChatGPT, Claude, Gemini">
+            </div>
+            <div class="field">
+              <label for="modelName">모델명</label>
+              <input id="modelName" name="modelName" type="text" placeholder="예: GPT-5, Claude Sonnet">
+            </div>
+            <div class="field">
+              <label for="analystLabel">분석 라벨</label>
+              <input id="analystLabel" name="analystLabel" type="text" placeholder="예: GPT-5 실험 1차">
+            </div>
+            <div class="field">
+              <label for="surveyVersionInput">질문 세트 버전</label>
+              <input id="surveyVersionInput" name="surveyVersionInput" type="text" readonly>
             </div>
           </div>
+
           <div class="question">
-            <label>
-              Q2. 응답할 때 정확성을 속도보다 우선하나요?
-            </label>
-            <div class="options">
-              <label class="option">
-                <input type="radio" name="q2" value="1" required>
-                전혀 아니다
-              </label>
-              <label class="option">
-                <input type="radio" name="q2" value="2">
-                아니다
-              </label>
-              <label class="option">
-                <input type="radio" name="q2" value="3">
-                보통이다
-              </label>
-              <label class="option">
-                <input type="radio" name="q2" value="4">
-                그렇다
-              </label>
-              <label class="option">
-                <input type="radio" name="q2" value="5">
-                매우 그렇다
-              </label>
-            </div>
-          </div>
-          <div class="question">
-            <label for="opinion">
-              추가 의견
-            </label>
+            <label for="rawResponse">AI 전체 답변</label>
             <textarea
-              id="opinion"
-              name="opinion"
-              rows="5"
-              placeholder="자유롭게 의견을 적어주세요."
+              id="rawResponse"
+              name="rawResponse"
+              rows="20"
+              placeholder="Q1:&#10;...&#10;&#10;Q1-1:&#10;...&#10;&#10;...&#10;&#10;[END OF SURVEY]"
+              required
             ></textarea>
           </div>
+
+          <div class="hint-grid">
+            <div class="hint-card">
+              <strong>파싱 기준</strong>
+              <p><code>Q번호:</code> 헤더를 기준으로 질문별 답변을 분리합니다.</p>
+            </div>
+            <div class="hint-card">
+              <strong>버전 관리</strong>
+              <p>응답은 현재 질문 세트 버전과 함께 저장됩니다.</p>
+            </div>
+            <div class="hint-card">
+              <strong>저장 구조</strong>
+              <p>질문, 축, 제약, 분석 태그, 점수가 함께 Firestore에 기록됩니다.</p>
+            </div>
+          </div>
+
           <div class="form-actions">
-            <button type="submit" id="submitBtn" class="primary-btn">
-              설문 제출하기
-            </button>
+            <button type="submit" id="submitBtn" class="primary-btn">분석 후 저장하기</button>
           </div>
           <div class="status" id="statusMessage" role="status" aria-live="polite"></div>
         </form>
       </div>
     </section>
+
+    <section class="panel results-panel" id="resultsSection" hidden>
+      <div class="section-header">
+        <h2>분석 결과</h2>
+        <span class="section-kicker" id="completenessLabel"></span>
+      </div>
+
+      <div class="prescription-sheet">
+        <div class="prescription-header">
+          <div>
+            <p class="prescription-label">AI Behavioral Prescription</p>
+            <h3>AI 행동 진단 리포트</h3>
+          </div>
+          <div class="prescription-meta" id="reportMeta"></div>
+        </div>
+
+        <div class="results-columns prescription-top">
+          <div class="results-card">
+            <h3>진단 소견</h3>
+            <p id="diagnosticNotes"></p>
+          </div>
+          <div class="results-card">
+            <h3>사용 처방</h3>
+            <ul id="recommendedUsage" class="bullet-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="vector-grid" id="axisScores"></div>
+
+      <div class="summary-panel">
+        <h3>결과 요약</h3>
+        <p id="summaryText"></p>
+      </div>
+
+      <div class="results-card warning-card">
+        <h3>주의 행동 특성</h3>
+        <ul id="behavioralWarnings" class="bullet-list"></ul>
+      </div>
+
+      <div class="results-columns">
+        <div class="results-card">
+          <h3>파싱 요약</h3>
+          <ul id="parseSummary" class="bullet-list"></ul>
+        </div>
+        <div class="results-card">
+          <h3>질문 세트 메타데이터</h3>
+          <ul id="metadataSummary" class="bullet-list"></ul>
+        </div>
+      </div>
+
+      <div class="results-card">
+        <h3>질문별 분석 미리보기</h3>
+        <div id="questionAnalysisList" class="question-analysis-list"></div>
+      </div>
+    </section>
   </div>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>

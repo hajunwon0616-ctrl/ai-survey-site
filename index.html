@@ -150,6 +150,10 @@
             <ul id="recommendedUsage" class="bullet-list"></ul>
           </div>
         </div>
+
+        <div class="results-actions">
+          <button id="copyReportBtn" class="secondary-btn" type="button">리포트 복사</button>
+        </div>
       </div>
 
       <div class="vector-grid" id="axisScores"></div>
@@ -176,7 +180,17 @@
       </div>
 
       <div class="results-card">
-        <h3>질문별 분석 미리보기</h3>
+        <div class="insight-toolbar">
+          <h3>질문별 분석 인사이트</h3>
+          <div class="insight-controls">
+            <select id="insightSort">
+              <option value="question-order">질문 순서</option>
+              <option value="highest-score">점수 높은 순</option>
+              <option value="lowest-score">점수 낮은 순</option>
+            </select>
+            <button id="insightToggle" class="secondary-btn" type="button">전체 보기</button>
+          </div>
+        </div>
         <div id="questionAnalysisList" class="question-analysis-list"></div>
       </div>
     </section>

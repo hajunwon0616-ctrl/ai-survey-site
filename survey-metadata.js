@@ -118,10 +118,23 @@ const SURVEY_DEFINITION = {
   questions: SURVEY_QUESTIONS
 };
 
-function buildSurveyPrompt() {
+const SURVEY_DEFINITIONS = {
+  [SURVEY_VERSION]: SURVEY_DEFINITION
+};
+
+function getSurveyVersion() {
+  return SURVEY_VERSION;
+}
+
+function getSurveyDefinition(version = SURVEY_VERSION) {
+  return SURVEY_DEFINITIONS[version] || SURVEY_DEFINITION;
+}
+
+function buildSurveyPrompt(version = SURVEY_VERSION) {
+  const surveyDefinition = getSurveyDefinition(version);
   const header = [
     "AI 행동 성향 분석 설문",
-    `Survey Version: ${SURVEY_VERSION}`,
+    `Survey Version: ${surveyDefinition.version}`,
     "",
     "아래 형식을 유지해 각 문항에 답변하십시오.",
     "형식 예시:",
@@ -135,11 +148,19 @@ function buildSurveyPrompt() {
     ""
   ];
 
-  const body = SURVEY_QUESTIONS
+  const body = surveyDefinition.questions
     .map((question) => `${question.questionNumber}\n${question.questionText}`)
     .join("\n\n");
 
   return `${header.join("\n")}\n${body}\n\n[END OF SURVEY]\n`;
 }
 
-export { SURVEY_DEFINITION, AXES, SURVEY_VERSION, buildSurveyPrompt };
+export {
+  SURVEY_DEFINITION,
+  SURVEY_DEFINITIONS,
+  AXES,
+  SURVEY_VERSION,
+  getSurveyDefinition,
+  getSurveyVersion,
+  buildSurveyPrompt
+};

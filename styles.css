@@ -259,6 +259,15 @@ textarea {
   font: inherit;
 }
 
+select {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text);
+  border: 1px solid rgba(40, 75, 99, 0.14);
+  font: inherit;
+}
+
 input:focus,
 textarea:focus {
   outline: 2px solid rgba(201, 111, 59, 0.16);
@@ -283,6 +292,10 @@ textarea {
 
 .results-panel {
   margin-bottom: 40px;
+}
+
+.results-actions {
+  margin-top: 8px;
 }
 
 .vector-grid {
@@ -314,10 +327,36 @@ textarea {
   margin-bottom: 8px;
 }
 
+.axis-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.axis-tooltip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(40, 75, 99, 0.08);
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: help;
+}
+
 .axis-score {
   font-size: 2rem;
   font-weight: 800;
   margin-bottom: 6px;
+}
+
+.axis-description {
+  margin: 0 0 12px;
+  font-size: 14px;
 }
 
 .axis-bar {
@@ -364,6 +403,19 @@ textarea {
 
 .question-analysis-item h4 {
   margin: 0 0 10px;
+}
+
+.question-analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.analysis-note {
+  margin: 10px 0 0;
+  color: var(--secondary);
+  font-size: 14px;
 }
 
 .analysis-meta,
@@ -450,6 +502,26 @@ textarea {
   margin-bottom: 18px;
 }
 
+.insight-toolbar,
+.insight-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.insight-toolbar {
+  margin-bottom: 16px;
+}
+
+.insight-toolbar h3 {
+  margin-bottom: 0;
+}
+
+.insight-controls {
+  flex-wrap: wrap;
+}
+
 code {
   background: rgba(40, 75, 99, 0.08);
   padding: 2px 6px;
@@ -477,8 +549,12 @@ code {
   }
 
   .prescription-header,
-  .prescription-meta-item {
+  .prescription-meta-item,
+  .insight-toolbar,
+  .insight-controls,
+  .question-analysis-header {
     flex-direction: column;
+    align-items: flex-start;
   }
 
   textarea {

@@ -50,44 +50,40 @@ function observeAuthSession(callback) {
       const profile = await ensureUserProfile(user);
       callback({ user, profile });
     } catch (error) {
-      console.error("Auth profile sync error:", error);
-      callback({
-        user,
-        profile: {
-          uid: user.uid,
-          displayName: user.displayName || "사용자",
-          email: user.email || "",
-          role: "authenticated"
-        }
-      });
-    }
+    console.error("Auth profile sync error:", error);
+    callback({
+      user,
+      profile: {
+        uid: user.uid,
+        displayName: user.displayName || "사용자",
+        email: user.email || "",
+        role: "user"
+      }
+    });
+  }
   });
 }
 
 async function ensureUserProfile(user) {
   const profileRef = doc(db, "userProfiles", user.uid);
   const profileSnapshot = await getDoc(profileRef);
+  const existingProfile = profileSnapshot.exists() ? profileSnapshot.data() : null;
   const baseProfile = {
     uid: user.uid,
     displayName: user.displayName || "",
     email: user.email || "",
     photoURL: user.photoURL || "",
     providerIds: user.providerData.map((item) => item.providerId),
-    role: profileSnapshot.exists() ? profileSnapshot.data().role || "authenticated" : "authenticated",
-    lastLoginAt: serverTimestamp()
+    role: existingProfile?.role || "user",
+    lastLoginAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
   };
 
-  if (!profileSnapshot.exists()) {
-    await setDoc(profileRef, {
-      ...baseProfile,
-      createdAt: serverTimestamp()
-    });
-  } else {
-    await setDoc(profileRef, {
-      ...profileSnapshot.data(),
-      ...baseProfile
-    });
-  }
+  await setDoc(profileRef, {
+    ...(existingProfile || {}),
+    ...baseProfile,
+    createdAt: existingProfile?.createdAt || serverTimestamp()
+  });
 
   const refreshed = await getDoc(profileRef);
   return refreshed.exists() ? refreshed.data() : baseProfile;

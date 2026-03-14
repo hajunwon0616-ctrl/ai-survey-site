@@ -47,7 +47,8 @@ function buildSubmissionPayload({
   analyzedResponses,
   axisScores,
   report,
-  activeConfig
+  activeConfig,
+  authSession
 }) {
   return {
     providerName,
@@ -73,6 +74,13 @@ function buildSubmissionPayload({
     summary: report.diagnosticSummary,
     report,
     questionResponses: analyzedResponses,
+    auth: {
+      accessLevel: authSession?.user ? authSession?.profile?.role || "authenticated" : "guest",
+      userId: authSession?.user?.uid || null,
+      displayName: authSession?.profile?.displayName || authSession?.user?.displayName || "",
+      email: authSession?.profile?.email || authSession?.user?.email || "",
+      isGuest: !authSession?.user
+    },
     payloadVersion: "analysis-pipeline-v2",
     storageTargets: {
       current: ["surveyResponses"],

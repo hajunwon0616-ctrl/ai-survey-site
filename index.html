@@ -10,6 +10,21 @@
   <div class="container">
     <section class="hero">
       <div class="panel hero-main">
+        <div class="account-strip">
+          <div class="account-copy">
+            <strong id="authTitle">선택 로그인</strong>
+            <p id="authDescription">로그인하지 않아도 기본 분석은 사용할 수 있습니다. 로그인하면 내 기록이 저장됩니다.</p>
+          </div>
+          <div id="authActions" class="account-actions">
+            <button type="button" class="secondary-btn" data-auth-provider="google" id="loginGoogleBtn">Google로 계속</button>
+            <button type="button" class="secondary-btn" data-auth-provider="facebook" id="loginFacebookBtn">Facebook으로 계속</button>
+            <button type="button" class="secondary-btn" data-auth-provider="github" id="loginGithubBtn">GitHub로 계속</button>
+            <button type="button" class="secondary-btn" id="signOutBtn" hidden>로그아웃</button>
+            <a id="adminLink" class="shortcut-link" href="./admin/" hidden>운영 대시보드</a>
+          </div>
+          <div id="authSummary" class="account-summary"></div>
+        </div>
+
         <div id="heroBadge" class="badge">Behavioral Profile Analysis</div>
         <h1 id="heroTitle">AI 행동 성향 분석 시스템</h1>
         <p id="heroDescription">
@@ -146,68 +161,15 @@
       </div>
     </section>
 
-    <section class="panel section" id="autonomyLabSection">
+    <section class="panel section" id="userHistorySection" hidden>
       <div class="section-header">
-        <h2 id="autonomyTitle">Autonomy Lab</h2>
-        <span id="autonomyKicker" class="section-kicker">Curator / Auditor / Simulator / Deployer</span>
+        <h2 id="historyTitle">내 분석 기록</h2>
+        <span id="historyKicker" class="section-kicker">Signed-in Users</span>
       </div>
-      <p id="autonomyDescription" class="sub">
-        기존 응답 데이터를 기반으로 자율 개선 사이클을 실행하고,
-        candidate proposal, evaluation run, trend report 상태를 확인합니다.
+      <p id="historyDescription" class="sub">
+        로그인하면 이전 제출 기록과 분석 리포트를 다시 열어볼 수 있습니다.
       </p>
-
-      <div class="form-actions">
-        <button type="button" id="runAutonomyBtn" class="primary-btn">자율 운영 사이클 실행</button>
-        <button type="button" id="refreshAutonomyBtn" class="secondary-btn">상태 새로고침</button>
-      </div>
-      <div class="status" id="autonomyStatus" role="status" aria-live="polite"></div>
-
-      <div class="autonomy-grid">
-        <section class="results-card autonomy-card">
-          <h3 id="autonomyActiveConfigTitle">Active Config</h3>
-          <div id="autonomyActiveConfig" class="autonomy-kv"></div>
-        </section>
-
-        <section class="results-card autonomy-card">
-          <h3 id="autonomySurveyDetailsTitle">Active Survey Set</h3>
-          <ul id="autonomySurveyDetails" class="bullet-list"></ul>
-        </section>
-
-        <section class="results-card autonomy-card autonomy-card-wide">
-          <h3 id="autonomyAgentBoardTitle">AI Worker Board</h3>
-          <div id="autonomyAgentBoard" class="agent-board"></div>
-        </section>
-
-        <section class="results-card autonomy-card autonomy-card-wide">
-          <h3 id="autonomyTimelineTitle">Activity Timeline</h3>
-          <ul id="autonomyTimeline" class="timeline-list"></ul>
-        </section>
-
-        <section class="results-card autonomy-card">
-          <h3 id="autonomyEvaluationsTitle">Recent Evaluations</h3>
-          <ul id="autonomyEvaluations" class="bullet-list"></ul>
-        </section>
-
-        <section class="results-card autonomy-card">
-          <h3 id="autonomyQuestionProposalsTitle">Question Proposals</h3>
-          <ul id="autonomyQuestionProposals" class="bullet-list"></ul>
-        </section>
-
-        <section class="results-card autonomy-card">
-          <h3 id="autonomyScoringProposalsTitle">Scoring Proposals</h3>
-          <ul id="autonomyScoringProposals" class="bullet-list"></ul>
-        </section>
-
-        <section class="results-card autonomy-card">
-          <h3 id="autonomyTrendsTitle">Trend Reports</h3>
-          <ul id="autonomyTrends" class="bullet-list"></ul>
-        </section>
-
-        <section class="results-card autonomy-card">
-          <h3 id="autonomyLogsTitle">Agent Logs</h3>
-          <ul id="autonomyLogs" class="bullet-list"></ul>
-        </section>
-      </div>
+      <div id="userHistoryList" class="history-grid"></div>
     </section>
 
   </div>

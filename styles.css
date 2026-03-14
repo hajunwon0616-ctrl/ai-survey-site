@@ -56,6 +56,44 @@ body.modal-open {
   padding: 36px;
 }
 
+.account-strip {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(40, 75, 99, 0.12);
+}
+
+.account-copy strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.account-copy p {
+  margin: 0;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  color: var(--secondary);
+  font-size: 14px;
+}
+
+.account-summary strong {
+  color: var(--text);
+}
+
 .badge {
   display: inline-block;
   background: rgba(40, 75, 99, 0.1);
@@ -518,6 +556,48 @@ textarea {
 .autonomy-empty {
   margin: 0;
   color: var(--muted);
+}
+
+.history-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.history-card,
+.history-empty {
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+}
+
+.history-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.history-card-head span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.history-card-meta,
+.history-card-summary,
+.history-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.history-card-summary {
+  margin-top: 10px;
+}
+
+.history-card-actions {
+  margin-top: 14px;
 }
 
 .results-panel {

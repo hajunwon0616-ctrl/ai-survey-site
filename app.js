@@ -7,7 +7,8 @@ import {
 import {
   getSurveyDefinition,
   getSurveyVersion,
-  buildSurveyPrompt
+  buildSurveyPrompt,
+  hasSurveyDefinition
 } from "./survey-metadata.js";
 import { parseSurveyResponse } from "./analysis/parser.js";
 import { analyzeResponses } from "./analysis/analyzer.js";
@@ -31,10 +32,21 @@ import {
   renderAutonomySnapshot,
   renderAutonomyStatus
 } from "./autonomy/ui.js";
+import { loadActiveRuntimeConfig } from "./autonomy/runtime-config.js";
 
-const surveyDefinition = getSurveyDefinition();
-const surveyVersion = getSurveyVersion();
+const DEFAULT_SURVEY_VERSION = getSurveyVersion();
+const DEFAULT_SCORING_VERSION = "scoring-v1";
+let surveyVersion = DEFAULT_SURVEY_VERSION;
+let surveyDefinition = getSurveyDefinition(DEFAULT_SURVEY_VERSION);
 let currentLocale = "ko";
+let runtimeConfig = {
+  requestedSurveyVersion: DEFAULT_SURVEY_VERSION,
+  activeSurveyVersion: DEFAULT_SURVEY_VERSION,
+  activeScoringVersion: DEFAULT_SCORING_VERSION,
+  previousSurveyVersion: null,
+  previousScoringVersion: null,
+  source: "fallback"
+};
 
 const elements = {
   startBtn: document.getElementById("startBtn"),
@@ -368,6 +380,7 @@ bindResultActions(elements, {
 initializeProviderModelControls(elements);
 initializeLanguageControls(elements);
 initializeAutonomyLab();
+initializeRuntimeConfig();
 
 elements.startBtn.addEventListener("click", () => {
   elements.surveySection.scrollIntoView({ behavior: "smooth" });
@@ -410,6 +423,7 @@ elements.analysisForm.addEventListener("submit", async (event) => {
     const report = buildPrescriptionReport({
       axisScores,
       surveyVersion,
+      scoringVersion: runtimeConfig.activeScoringVersion,
       rawResponse,
       modelName,
       locale: currentLocale
@@ -420,12 +434,14 @@ elements.analysisForm.addEventListener("submit", async (event) => {
       modelName,
       testLabel,
       surveyVersion,
+      scoringVersion: runtimeConfig.activeScoringVersion,
       rawResponse,
       surveyDefinition,
       parsed,
       analyzedResponses,
       axisScores,
-      report
+      report,
+      activeConfig: runtimeConfig
     });
 
     latestRenderedPayload = {
@@ -487,6 +503,7 @@ function buildCopyableReport(payload) {
   return [
     payload.report.reportHeader.reportType,
     `Survey Version: ${payload.surveyVersion}`,
+    `Scoring Version: ${payload.scoringVersion || payload.report.reportHeader.scoringVersion || DEFAULT_SCORING_VERSION}`,
     `Analysis ID: ${payload.report.reportHeader.analysisId}`,
     "",
     vectorLines,
@@ -779,6 +796,17 @@ function initializeAutonomyLab() {
   refreshAutonomyLab();
 }
 
+async function initializeRuntimeConfig() {
+  const nextConfig = await loadActiveRuntimeConfig({
+    db,
+    fallbackSurveyVersion: DEFAULT_SURVEY_VERSION,
+    fallbackScoringVersion: DEFAULT_SCORING_VERSION,
+    hasSurveyDefinition
+  });
+
+  applyRuntimeConfig(nextConfig);
+}
+
 async function refreshAutonomyLab() {
   if (!elements.autonomyStatus) {
     return;
@@ -790,6 +818,7 @@ async function refreshAutonomyLab() {
   try {
     const snapshot = await loadAutonomySnapshot({ db });
     renderAutonomySnapshot(elements, snapshot);
+    await initializeRuntimeConfig();
   } catch (error) {
     console.error("Autonomy snapshot error:", error);
     renderAutonomyStatus(
@@ -818,6 +847,7 @@ async function executeAutonomyCycle() {
     });
 
     renderAutonomySnapshot(elements, result.snapshot);
+    await initializeRuntimeConfig();
 
     if (!result.ok && result.reason === "no-submissions") {
       renderAutonomyStatus(elements.autonomyStatus, UI_COPY[currentLocale].autonomyStatusNoData, true);
@@ -843,5 +873,22 @@ function setAutonomyBusy(isBusy) {
   }
   if (elements.refreshAutonomyBtn) {
     elements.refreshAutonomyBtn.disabled = isBusy;
+  }
+}
+
+function applyRuntimeConfig(nextConfig) {
+  runtimeConfig = nextConfig;
+  surveyVersion = nextConfig.activeSurveyVersion || DEFAULT_SURVEY_VERSION;
+  surveyDefinition = getSurveyDefinition(surveyVersion);
+  initializePage(elements, surveyVersion, currentLocale);
+  elements.surveyVersionInput.value = surveyVersion;
+
+  if (nextConfig.source === "fallback-missing-survey") {
+    showStatusMessage(
+      elements.statusMessage,
+      currentLocale === "en"
+        ? `Active survey version ${nextConfig.requestedSurveyVersion} is not installed locally. Falling back to ${surveyVersion}.`
+        : `활성 설문 버전 ${nextConfig.requestedSurveyVersion}이 로컬에 없어 ${surveyVersion}으로 대체합니다.`
+    );
   }
 }

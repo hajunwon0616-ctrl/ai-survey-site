@@ -1,4 +1,11 @@
-function buildPrescriptionReport({ axisScores, surveyVersion, rawResponse, modelName, locale = "ko" }) {
+function buildPrescriptionReport({
+  axisScores,
+  surveyVersion,
+  scoringVersion,
+  rawResponse,
+  modelName,
+  locale = "ko"
+}) {
   const analysisId = buildAnalysisId();
   const generatedAt = new Date().toLocaleString(locale === "en" ? "en-US" : "ko-KR", {
     year: "numeric",
@@ -14,6 +21,7 @@ function buildPrescriptionReport({ axisScores, surveyVersion, rawResponse, model
     reportHeader: {
       reportType: "AI Behavioral Report",
       surveyVersion,
+      scoringVersion: scoringVersion || "scoring-v1",
       analysisId,
       generatedAt
     },
@@ -32,18 +40,21 @@ function buildSubmissionPayload({
   modelName,
   testLabel,
   surveyVersion,
+  scoringVersion,
   rawResponse,
   surveyDefinition,
   parsed,
   analyzedResponses,
   axisScores,
-  report
+  report,
+  activeConfig
 }) {
   return {
     providerName,
     modelName,
     testLabel,
     surveyVersion,
+    scoringVersion,
     rawResponse,
     parserSummary: {
       headerCount: parsed.headerCount,
@@ -67,9 +78,19 @@ function buildSubmissionPayload({
       current: ["surveyResponses"],
       future: ["parsedAnswers", "analysisResults", "reports"]
     },
+    activeConfig: {
+      requestedSurveyVersion: activeConfig?.requestedSurveyVersion || surveyVersion,
+      activeSurveyVersion: activeConfig?.activeSurveyVersion || surveyVersion,
+      activeScoringVersion: activeConfig?.activeScoringVersion || scoringVersion || "scoring-v1",
+      previousSurveyVersion: activeConfig?.previousSurveyVersion || null,
+      previousScoringVersion: activeConfig?.previousScoringVersion || null,
+      source: activeConfig?.source || "fallback"
+    },
     analysisMeta: {
       totalQuestions: surveyDefinition.questions.length,
       totalAxes: surveyDefinition.axes.length,
+      activeScoringVersion: scoringVersion || "scoring-v1",
+      runtimeConfigSource: activeConfig?.source || "fallback",
       readyForQuestionCurator: true
     }
   };

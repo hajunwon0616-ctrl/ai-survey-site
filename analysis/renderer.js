@@ -102,6 +102,8 @@ const UI_TEXT = {
     generatedTime: "Generated Time",
     responseLength: "Response Length",
     model: "Model",
+    scoringVersion: "채점 버전",
+    runtimeSource: "런타임 설정",
     noWeakness: "뚜렷한 취약 축이 감지되지 않았습니다.",
     parsedCount: "파싱된 질문 수",
     headerCount: "인식된 질문 헤더 수",
@@ -145,6 +147,8 @@ const UI_TEXT = {
     generatedTime: "Generated Time",
     responseLength: "Response Length",
     model: "Model",
+    scoringVersion: "Scoring Version",
+    runtimeSource: "Runtime Config",
     noWeakness: "No major weakness axes were detected.",
     parsedCount: "Parsed Questions",
     headerCount: "Detected Headers",
@@ -267,9 +271,11 @@ function renderResults(elements, payload, overrides = {}) {
   ]);
   renderList(elements.metadataSummary, [
     `${text.metadataVersion}: ${payload.surveyVersion}`,
+    `${text.scoringVersion}: ${payload.scoringVersion || payload.analysisMeta.activeScoringVersion || text.none}`,
     `${text.axisCount}: ${payload.analysisMeta.totalAxes}`,
     `${text.storageCollection}: surveyResponses`,
     `${text.futureTargets}: ${payload.storageTargets.future.join(", ")}`,
+    `${text.runtimeSource}: ${payload.analysisMeta.runtimeConfigSource || text.none}`,
     `${text.curatorReady}: ${payload.analysisMeta.readyForQuestionCurator ? text.yes : text.no}`
   ]);
   renderQuestionInsights(elements, payload.questionResponses, uiState);
@@ -290,6 +296,7 @@ function renderReportMeta(container, payload) {
     [text.generatedTime, payload.report.reportHeader.generatedAt],
     [text.responseLength, `${payload.report.responseLength} chars`],
     [text.model, payload.modelName || text.none],
+    [text.scoringVersion, payload.scoringVersion || payload.report.reportHeader.scoringVersion || text.none],
     [text.testLabel, payload.testLabel || text.none]
   ];
 

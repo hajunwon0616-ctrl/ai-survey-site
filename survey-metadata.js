@@ -134,6 +134,10 @@ function getSurveyDefinition(version = SURVEY_VERSION) {
   return SURVEY_DEFINITIONS[version] || SURVEY_DEFINITION;
 }
 
+function hasSurveyDefinition(version) {
+  return Boolean(SURVEY_DEFINITIONS[version]);
+}
+
 function getAnchorQuestions(version = SURVEY_VERSION) {
   return getSurveyDefinition(version).questions.filter((question) => question.anchor);
 }
@@ -211,5 +215,6 @@ export {
   getSurveyDefinition,
   getAnchorQuestions,
   getSurveyVersion,
+  hasSurveyDefinition,
   buildSurveyPrompt
 };

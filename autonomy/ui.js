@@ -6,6 +6,8 @@ function renderAutonomySnapshot(elements, snapshot) {
   elements.autonomyActiveConfig.innerHTML = "";
   renderKeyValue(elements.autonomyActiveConfig, "Active Survey", snapshot.activeConfig?.activeSurveyVersion || "not set");
   renderKeyValue(elements.autonomyActiveConfig, "Active Scoring", snapshot.activeConfig?.activeScoringVersion || "not set");
+  renderKeyValue(elements.autonomyActiveConfig, "Previous Survey", snapshot.activeConfig?.previousSurveyVersion || "none");
+  renderKeyValue(elements.autonomyActiveConfig, "Previous Scoring", snapshot.activeConfig?.previousScoringVersion || "none");
 
   renderSimpleList(
     elements.autonomyEvaluations,

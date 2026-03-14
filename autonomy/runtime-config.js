@@ -1,10 +1,12 @@
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { COLLECTIONS } from "../data/autonomy-schemas.js";
+import { createSurveyDefinitionFromQuestions } from "../survey-metadata.js";
 
 async function loadActiveRuntimeConfig({
   db,
   fallbackSurveyVersion,
   fallbackScoringVersion,
+  fallbackSurveyDefinition,
   hasSurveyDefinition
 }) {
   const fallbackConfig = {
@@ -13,6 +15,7 @@ async function loadActiveRuntimeConfig({
     activeScoringVersion: fallbackScoringVersion,
     previousSurveyVersion: null,
     previousScoringVersion: null,
+    runtimeSurveyDefinition: fallbackSurveyDefinition,
     source: "fallback"
   };
 
@@ -25,14 +28,28 @@ async function loadActiveRuntimeConfig({
     const data = snapshot.data();
     const requestedSurveyVersion = data.activeSurveyVersion || fallbackSurveyVersion;
     const surveyAvailable = hasSurveyDefinition(requestedSurveyVersion);
+    const questionVersionSnapshot = await getDoc(doc(db, COLLECTIONS.questionVersions, requestedSurveyVersion));
+    const runtimeSurveyDefinition = questionVersionSnapshot.exists() && Array.isArray(questionVersionSnapshot.data().questions)
+      ? createSurveyDefinitionFromQuestions({
+          version: requestedSurveyVersion,
+          title: questionVersionSnapshot.data().title || fallbackSurveyDefinition?.title,
+          axes: questionVersionSnapshot.data().axes || fallbackSurveyDefinition?.axes,
+          questions: questionVersionSnapshot.data().questions
+        })
+      : fallbackSurveyDefinition;
 
     return {
       requestedSurveyVersion,
-      activeSurveyVersion: surveyAvailable ? requestedSurveyVersion : fallbackSurveyVersion,
+      activeSurveyVersion: questionVersionSnapshot.exists() || surveyAvailable ? requestedSurveyVersion : fallbackSurveyVersion,
       activeScoringVersion: data.activeScoringVersion || fallbackScoringVersion,
       previousSurveyVersion: data.previousSurveyVersion || null,
       previousScoringVersion: data.previousScoringVersion || null,
-      source: surveyAvailable ? "firestore" : "fallback-missing-survey"
+      runtimeSurveyDefinition,
+      source: questionVersionSnapshot.exists()
+        ? "firestore-version"
+        : surveyAvailable
+          ? "firestore-config"
+          : "fallback-missing-survey"
     };
   } catch (error) {
     console.error("Runtime config load error:", error);

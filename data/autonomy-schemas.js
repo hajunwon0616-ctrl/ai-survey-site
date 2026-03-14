@@ -23,14 +23,27 @@ const VERSION_STATUS = {
   rolledBack: "rolled_back"
 };
 
-function createQuestionVersionDoc({ versionId, basedOn, questions, createdBy, status = VERSION_STATUS.candidate }) {
+function createQuestionVersionDoc({
+  versionId,
+  basedOn,
+  questions,
+  createdBy,
+  status = VERSION_STATUS.candidate,
+  title = "AI Behavioral Profile Survey",
+  axes = []
+}) {
   return {
     versionId,
     basedOn,
+    title,
+    axes,
     questions,
+    questionCount: questions.length,
+    anchorCount: questions.filter((question) => question.anchor).length,
     status,
     createdBy,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 }
 
@@ -41,7 +54,8 @@ function createScoringVersionDoc({ versionId, basedOn, rules, createdBy, status 
     rules,
     status,
     createdBy,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 }
 

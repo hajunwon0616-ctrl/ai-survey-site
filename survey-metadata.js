@@ -126,6 +126,52 @@ const SURVEY_DEFINITIONS = {
   [SURVEY_VERSION]: SURVEY_DEFINITION
 };
 
+function normalizeRuntimeQuestion(question, version = SURVEY_VERSION) {
+  return {
+    questionId: question.questionId,
+    questionNumber: question.questionNumber || question.questionId,
+    questionText: question.questionText || "",
+    primaryAxis: question.primaryAxis || "Cognitive Structure",
+    secondaryAxes: Array.isArray(question.secondaryAxes) ? question.secondaryAxes : [],
+    constraints: {
+      maxChars: null,
+      maxWords: null,
+      bulletCount: null,
+      oneSentence: false,
+      oneWord: false,
+      forbiddenWords: [],
+      ...(question.constraints || {})
+    },
+    version: question.version || version,
+    active: question.active !== false,
+    traits: {
+      impossibleKnowledge: false,
+      hypothetical: false,
+      correctionTask: false,
+      safetySensitive: false,
+      prefersAnalogy: false,
+      audienceTarget: null,
+      ...(question.traits || {})
+    },
+    anchor: Boolean(question.anchor),
+    mutable: question.mutable !== false
+  };
+}
+
+function createSurveyDefinitionFromQuestions({
+  version = SURVEY_VERSION,
+  title = SURVEY_DEFINITION.title,
+  axes = AXES,
+  questions = []
+}) {
+  return {
+    version,
+    title,
+    axes,
+    questions: questions.map((question) => normalizeRuntimeQuestion(question, version))
+  };
+}
+
 function getSurveyVersion() {
   return SURVEY_VERSION;
 }
@@ -142,8 +188,7 @@ function getAnchorQuestions(version = SURVEY_VERSION) {
   return getSurveyDefinition(version).questions.filter((question) => question.anchor);
 }
 
-function buildSurveyPrompt(version = SURVEY_VERSION, locale = "ko") {
-  const surveyDefinition = getSurveyDefinition(version);
+function buildSurveyPromptFromDefinition(surveyDefinition, locale = "ko") {
   const header = locale === "en"
     ? [
         "AI Behavior Analysis Survey",
@@ -207,14 +252,21 @@ function buildSurveyPrompt(version = SURVEY_VERSION, locale = "ko") {
   return `${header.join("\n")}\n${body}\n\n[END OF SURVEY]\n`;
 }
 
+function buildSurveyPrompt(version = SURVEY_VERSION, locale = "ko") {
+  return buildSurveyPromptFromDefinition(getSurveyDefinition(version), locale);
+}
+
 export {
   SURVEY_DEFINITION,
   SURVEY_DEFINITIONS,
   AXES,
   SURVEY_VERSION,
+  createSurveyDefinitionFromQuestions,
   getSurveyDefinition,
   getAnchorQuestions,
   getSurveyVersion,
   hasSurveyDefinition,
+  normalizeRuntimeQuestion,
+  buildSurveyPromptFromDefinition,
   buildSurveyPrompt
 };

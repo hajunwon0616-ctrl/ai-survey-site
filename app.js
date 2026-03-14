@@ -7,7 +7,7 @@ import {
 import {
   getSurveyDefinition,
   getSurveyVersion,
-  buildSurveyPrompt,
+  buildSurveyPromptFromDefinition,
   hasSurveyDefinition
 } from "./survey-metadata.js";
 import { parseSurveyResponse } from "./analysis/parser.js";
@@ -93,6 +93,9 @@ const elements = {
   refreshAutonomyBtn: document.getElementById("refreshAutonomyBtn"),
   autonomyStatus: document.getElementById("autonomyStatus"),
   autonomyActiveConfig: document.getElementById("autonomyActiveConfig"),
+  autonomySurveyDetails: document.getElementById("autonomySurveyDetails"),
+  autonomyAgentBoard: document.getElementById("autonomyAgentBoard"),
+  autonomyTimeline: document.getElementById("autonomyTimeline"),
   autonomyEvaluations: document.getElementById("autonomyEvaluations"),
   autonomyQuestionProposals: document.getElementById("autonomyQuestionProposals"),
   autonomyScoringProposals: document.getElementById("autonomyScoringProposals"),
@@ -193,6 +196,9 @@ const UI_COPY = {
     runAutonomyBtn: "자율 운영 사이클 실행",
     refreshAutonomyBtn: "상태 새로고침",
     autonomyActiveConfigTitle: "Active Config",
+    autonomySurveyDetailsTitle: "활성 질문 세트",
+    autonomyAgentBoardTitle: "AI 직원 보드",
+    autonomyTimelineTitle: "활동 타임라인",
     autonomyEvaluationsTitle: "Recent Evaluations",
     autonomyQuestionProposalsTitle: "Question Proposals",
     autonomyScoringProposalsTitle: "Scoring Proposals",
@@ -296,6 +302,9 @@ const UI_COPY = {
     runAutonomyBtn: "Run autonomy cycle",
     refreshAutonomyBtn: "Refresh status",
     autonomyActiveConfigTitle: "Active Config",
+    autonomySurveyDetailsTitle: "Active Survey Set",
+    autonomyAgentBoardTitle: "AI Worker Board",
+    autonomyTimelineTitle: "Activity Timeline",
     autonomyEvaluationsTitle: "Recent Evaluations",
     autonomyQuestionProposalsTitle: "Question Proposals",
     autonomyScoringProposalsTitle: "Scoring Proposals",
@@ -387,7 +396,7 @@ elements.startBtn.addEventListener("click", () => {
 });
 
 elements.downloadBtn.addEventListener("click", () => {
-  const content = buildSurveyPrompt(surveyVersion, currentLocale);
+  const content = buildSurveyPromptFromDefinition(surveyDefinition, currentLocale);
   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -693,6 +702,9 @@ function applyLocale(locale) {
     runAutonomyBtn: copy.runAutonomyBtn,
     refreshAutonomyBtn: copy.refreshAutonomyBtn,
     autonomyActiveConfigTitle: copy.autonomyActiveConfigTitle,
+    autonomySurveyDetailsTitle: copy.autonomySurveyDetailsTitle,
+    autonomyAgentBoardTitle: copy.autonomyAgentBoardTitle,
+    autonomyTimelineTitle: copy.autonomyTimelineTitle,
     autonomyEvaluationsTitle: copy.autonomyEvaluationsTitle,
     autonomyQuestionProposalsTitle: copy.autonomyQuestionProposalsTitle,
     autonomyScoringProposalsTitle: copy.autonomyScoringProposalsTitle,
@@ -801,6 +813,7 @@ async function initializeRuntimeConfig() {
     db,
     fallbackSurveyVersion: DEFAULT_SURVEY_VERSION,
     fallbackScoringVersion: DEFAULT_SCORING_VERSION,
+    fallbackSurveyDefinition: getSurveyDefinition(DEFAULT_SURVEY_VERSION),
     hasSurveyDefinition
   });
 
@@ -879,7 +892,7 @@ function setAutonomyBusy(isBusy) {
 function applyRuntimeConfig(nextConfig) {
   runtimeConfig = nextConfig;
   surveyVersion = nextConfig.activeSurveyVersion || DEFAULT_SURVEY_VERSION;
-  surveyDefinition = getSurveyDefinition(surveyVersion);
+  surveyDefinition = nextConfig.runtimeSurveyDefinition || getSurveyDefinition(surveyVersion);
   initializePage(elements, surveyVersion, currentLocale);
   elements.surveyVersionInput.value = surveyVersion;
 

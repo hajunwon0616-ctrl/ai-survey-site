@@ -53,6 +53,7 @@ body.modal-open {
 }
 
 .hero-main {
+  position: relative;
   padding: 36px;
 }
 
@@ -92,6 +93,31 @@ body.modal-open {
 
 .account-summary strong {
   color: var(--text);
+}
+
+@media (min-width: 980px) {
+  .hero-main {
+    min-height: 320px;
+    padding-right: 380px;
+  }
+
+  .account-strip {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    width: min(332px, calc(100% - 56px));
+    margin-bottom: 0;
+    z-index: 2;
+  }
+
+  .account-actions {
+    justify-content: flex-end;
+  }
+
+  .account-summary {
+    justify-content: flex-end;
+    text-align: right;
+  }
 }
 
 .badge {
@@ -1211,6 +1237,11 @@ code {
   .panel,
   .hero-main {
     padding: 22px;
+  }
+
+  .hero-main {
+    min-height: auto;
+    padding-right: 22px;
   }
 
   .section-header {

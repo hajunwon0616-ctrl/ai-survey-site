@@ -41,6 +41,7 @@ import { loadActiveRuntimeConfig } from "./autonomy/runtime-config.js";
 import {
   isAdminProfile,
   observeAuthSession,
+  getAuthErrorMessage,
   signInWithProvider,
   signOutCurrentUser
 } from "./auth/auth.js";
@@ -251,6 +252,7 @@ const UI_COPY = {
     loginSuccess: "로그인되었습니다.",
     logoutSuccess: "로그아웃되었습니다.",
     loginError: "로그인 중 오류가 발생했습니다.",
+    loginRedirecting: "브라우저 보안 설정 때문에 리디렉션 방식으로 로그인 화면을 여는 중입니다.",
     loadingParsing: "질문별 응답을 파싱하는 중",
     loadingAnalyzing: "질문별 행동 특성을 분석하는 중",
     loadingScoring: "행동 벡터를 계산하는 중",
@@ -370,6 +372,7 @@ const UI_COPY = {
     loginSuccess: "Signed in successfully.",
     logoutSuccess: "Signed out.",
     loginError: "Sign-in failed.",
+    loginRedirecting: "The popup was blocked, so the sign-in page is opening with redirect.",
     loadingParsing: "Parsing question-by-question responses",
     loadingAnalyzing: "Analyzing behavioral traits by question",
     loadingScoring: "Calculating the behavioral vector",
@@ -696,11 +699,15 @@ function initializeAuthSession() {
 
 async function handleProviderLogin(providerKey) {
   try {
-    await signInWithProvider(providerKey);
+    const result = await signInWithProvider(providerKey);
+    if (result?.redirected) {
+      showStatusMessage(elements.statusMessage, UI_COPY[currentLocale].loginRedirecting);
+      return;
+    }
     showStatusMessage(elements.statusMessage, UI_COPY[currentLocale].loginSuccess);
   } catch (error) {
     console.error("Provider sign-in error:", error);
-    showStatusMessage(elements.statusMessage, `${UI_COPY[currentLocale].loginError} ${error.message}`);
+    showStatusMessage(elements.statusMessage, getAuthErrorMessage(error, currentLocale));
   }
 }
 

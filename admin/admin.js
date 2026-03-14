@@ -9,6 +9,7 @@ import {
   query
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
+  getAuthErrorMessage,
   isAdminProfile,
   observeAuthSession,
   signInWithProvider,
@@ -110,11 +111,15 @@ function initializeAdminAuth() {
 
 async function handleLogin(providerKey) {
   try {
-    await signInWithProvider(providerKey);
+    const result = await signInWithProvider(providerKey);
+    if (result?.redirected) {
+      setStatus("팝업이 차단되어 리디렉션 방식으로 로그인 화면을 엽니다.");
+      return;
+    }
     setStatus("로그인에 성공했습니다.");
   } catch (error) {
     console.error("Admin login error:", error);
-    setStatus(`로그인 중 오류가 발생했습니다. ${error.message}`, true);
+    setStatus(getAuthErrorMessage(error, "ko"), true);
   }
 }
 
